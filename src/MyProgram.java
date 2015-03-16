@@ -9,5 +9,6 @@ public class MyProgram {
         String baseDir = "tests\\Test01\\";
 
         c.loadFromFile(baseDir + "curricula.utt", baseDir + "relation.utt", 30);
+        System.out.println("Hey");
     }
 }
