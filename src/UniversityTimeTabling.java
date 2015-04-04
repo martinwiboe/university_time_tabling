@@ -1,7 +1,7 @@
 /**
  * Created by Martin on 16-03-2015.
  */
-public class MyProgram {
+public class UniversityTimeTabling {
     public static void main(String[] args) throws Exception {
         // Validate input parameter count and length
         if (args == null || args.length < 7) {
