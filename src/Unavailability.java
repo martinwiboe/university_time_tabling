@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,10 +12,11 @@ public class Unavailability {
      * Look up whether a course is unavailable on [day][period][course]
      */
     public boolean[][][] courseUnavailable;
-
+    public List<UnavailabilityConstraint> constraints;
 
     public void loadFromFile(String file, int numberOfDays, int numberOfPeriods, int numberOfCourses) throws FileNotFoundException {
         courseUnavailable = new boolean[numberOfDays][numberOfPeriods][numberOfCourses];
+        constraints = new LinkedList<UnavailabilityConstraint>();
 
         Pattern linePattern = Pattern.compile("C(\\d+) (\\d+) (\\d+)");
 
@@ -30,11 +33,13 @@ public class Unavailability {
 
                 if (!match.matches())
                     continue;
+                UnavailabilityConstraint constraint = new UnavailabilityConstraint();
+                constraint.course = Integer.parseInt(match.group(1));
+                constraint.day = Integer.parseInt(match.group(2));
+                constraint.period  = Integer.parseInt(match.group(3));
+                constraints.add(constraint);
 
-                int courseId = Integer.parseInt(match.group(1));
-                int day = Integer.parseInt(match.group(2));
-                int period  = Integer.parseInt(match.group(3));
-                courseUnavailable[day][period][courseId] = true;
+                courseUnavailable[constraint.day][constraint.period][constraint.course] = true;
             }
         } finally {
             if (scanner != null)
@@ -42,3 +47,5 @@ public class Unavailability {
         }
     }
 }
+
+

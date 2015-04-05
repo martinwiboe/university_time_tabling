@@ -8,6 +8,9 @@ import java.util.regex.Pattern;
  * Created by Martin on 16-03-2015.
  */
 public class Curriculum {
+    /**
+     * Look up whether there is a relation between [course][curriculum]
+     */
     boolean isCourseInCurriculum[][];
 
     public void loadFromFile(String curriculaFile, String relationFile, int numberOfCourses) {

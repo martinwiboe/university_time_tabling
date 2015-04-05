@@ -24,37 +24,54 @@ public class UniversityTimeTabling {
         String relationFile = args[5];
         String unavailabilityFile = args[6];
 
+        // Create the heuristic
+        Heuristic heuristic = new DoNothingHeuristic();
+        heuristic.setTimeout(timeout);
+        print("Using heuristic " + heuristic.getClass().getSimpleName());
+
+
         // Load basic info about the problem
         print("Loading basic info...");
         BasicInfo basicInfo = new BasicInfo();
         basicInfo.loadFromFile(basicFile);
+        heuristic.basicInfo = basicInfo;
 
         // Load the curriculum<->course mappings
         print("Loading curricula...");
-        Curriculum c = new Curriculum();
-        c.loadFromFile(curriculaFile, relationFile, basicInfo.courses);
+        heuristic.curriculum = new Curriculum();
+        heuristic.curriculum.loadFromFile(curriculaFile, relationFile, basicInfo.courses);
 
         // Load the list of lecturers
         print("Loading lecturers...");
-        Lecturers l = new Lecturers();
-        l.loadFromFile(lecturersFile);
+        heuristic.lecturers = new Lecturers();
+        heuristic.lecturers.loadFromFile(lecturersFile);
 
         // Load the list of courses
         print("Loading courses...");
-        Courses courses = new Courses();
-        courses.loadFromFile(coursesFile, basicInfo.courses);
+        heuristic.courses = new Courses();
+        heuristic.courses.loadFromFile(coursesFile, basicInfo.courses);
 
         // Load unavailability times
         print("Loading unavailability...");
-        Unavailability unavailability = new Unavailability();
-        unavailability.loadFromFile(unavailabilityFile, basicInfo.days, basicInfo.periodsPerDay, basicInfo.courses);
+        heuristic.unavailability = new Unavailability();
+        heuristic.unavailability.loadFromFile(unavailabilityFile, basicInfo.days, basicInfo.periodsPerDay, basicInfo.courses);
 
         // Load rooms capacity
         print("Loading rooms...");
-        Rooms rooms = new Rooms();
-        rooms.loadFromFile(roomsFile, basicInfo.rooms);
+        heuristic.rooms = new Rooms();
+        heuristic.rooms.loadFromFile(roomsFile, basicInfo.rooms);
 
         print("Done loading problem definition");
+
+        print("Generating initial solution...");
+        Schedule initialSchedule = heuristic.getRandomInitialSolution();
+        print("Starting search...");
+
+        Schedule solution = heuristic.search(initialSchedule);
+
+        print("Found a solution!");
+
+        print(solution.toString());
     }
 
     private static void print(String message) {
