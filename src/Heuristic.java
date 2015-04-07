@@ -75,7 +75,7 @@ public abstract class Heuristic {
                         continue;
 
                     // Remember that the lecturer is busy. If we already know this, the constraint is violated.
-                    int lecturer = courses.lecturerForCourse[assignedCourse];
+                    int lecturer = lecturers.lecturers[assignedCourse];
                     if (lecturerBusy[lecturer])
                         return false;
                     lecturerBusy[lecturer] = true;
@@ -143,72 +143,7 @@ public abstract class Heuristic {
     }
 
     public Schedule getRandomInitialSolution(){
-        Schedule result = new Schedule(basicInfo.days, basicInfo.periodsPerDay, basicInfo.rooms);
-        int[] courseAssignmentCount = new int[basicInfo.courses];
-        
-        for (int day = 0; day < basicInfo.days; day++) {
-    		boolean[] courseAlreadyAssigned = new boolean[basicInfo.courses];
-    		
-        	for (int period = 0; period < basicInfo.periods; period++) {
-        		boolean[] lecturerBusy = new boolean[basicInfo.lecturers];
-        		boolean[] curriculumBusy = new boolean[basicInfo.curricula];
-        		for (int room = 0; room < basicInfo.rooms; room++) {
-        			int assignedCourse = 0; // fix
-        			int candidatecourse = 0;
-        			// find the course to assign, subject to
-        			while (assignedCourse == 0) {
-        				candidateCourse++; // maybe use a priority queue instead?
-        				
-	        			// course not already assigned in time slot
-        				if (courseAlreadyAssigned[candidatecourse])
-        					continue;
-        				
-	        			// course not unavailable in time slot
-        				if (unavailability.courseUnavailable[day][period][candidatecourse])
-        					continue;
-        				
-	        			// course lecturer cannot be busy
-	        			if (lecturerBusy[lecturers.lecturerForCourse[candidatecourse])
-	        				continue;
-        				
-        				// course curriculum cannot be busy
-	        			boolean curriculumConflict = false;
-	                    for (int curriculum = 0; curriculum < basicInfo.curricula; curriculum++) {
-	                        if (this.curriculum.isCourseInCurriculum[candidatecourse][curriculum]) {
-	                            if (curriculumBusy[curriculum])
-	                                curriculumConflict = true;
-	                        }
-	                    }
-	                    if (curriculumConflict)
-	                    	continue;
-	        			
-	        			// course max lectures cannot be reached
-	                    if (courseAssignmentCount[candidatecourse] == courses.minimumLecturesForCourse[candidatecourse])
-	                    	continue;
-	                    
-	        			// course minimum working days .... ?
-	                    
-	                    // no constraints violated! assign this course
-	                    assignedCourse = candidatecourse;
-        			}
-        			
-        			// increment constraints
-        			courseAlreadyAssigned[assignedCourse] = true;
-        			lecturerBusy[lecturers.lecturerForCourse[candidatecourse] = true;
-        			for (int curriculum = 0; curriculum < basicInfo.curricula; curriculum++) {
-                        if (this.curriculum.isCourseInCurriculum[assignedCourse][curriculum]) {
-                            curriculumBusy[curriculum] = true;
-                        }
-                    }
-        			courseAssignmentCount[candidatecourse]++;
-        			
-        			result.assignments[day][period[room] = assignedCourse;
-        		}
-        	}
-        }
-        
-        return result;
-        
+        return new Schedule(basicInfo.days, basicInfo.periodsPerDay, basicInfo.rooms);
         /*
         int slot;
         //Haven't created the variable, assume they will be declared later
