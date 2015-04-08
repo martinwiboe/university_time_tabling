@@ -168,7 +168,7 @@ public abstract class Heuristic {
         					continue;
         				
 	        			// course lecturer cannot be busy
-	        			if (lecturerBusy[lecturers.lecturerForCourse[candidatecourse])
+	        			if (lecturerBusy[courses.lecturerForCourse[candidatecourse])
 	        				continue;
         				
         				// course curriculum cannot be busy
@@ -183,7 +183,7 @@ public abstract class Heuristic {
 	                    	continue;
 	        			
 	        			// course max lectures cannot be reached
-	                    if (courseAssignmentCount[candidatecourse] == courses.minimumLecturesForCourse[candidatecourse])
+	                    if (courseAssignmentCount[candidatecourse] == courses.numberOfLecturesForCourse[candidatecourse])
 	                    	continue;
 	                    
 	        			// course minimum working days .... ?
@@ -194,7 +194,7 @@ public abstract class Heuristic {
         			
         			// increment constraints
         			courseAlreadyAssigned[assignedCourse] = true;
-        			lecturerBusy[lecturers.lecturerForCourse[candidatecourse] = true;
+        			lecturerBusy[courses.lecturerForCourse[candidatecourse] = true;
         			for (int curriculum = 0; curriculum < basicInfo.curricula; curriculum++) {
                         if (this.curriculum.isCourseInCurriculum[assignedCourse][curriculum]) {
                             curriculumBusy[curriculum] = true;

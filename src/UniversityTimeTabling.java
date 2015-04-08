@@ -16,7 +16,7 @@ public class UniversityTimeTabling {
         } catch (NumberFormatException nEx) {
         }
 
-        String basicFile = args[0];
+        String basicFile = args[0]; 
         String coursesFile = args[1];
         String lecturersFile = args[2];
         String roomsFile = args[3];
