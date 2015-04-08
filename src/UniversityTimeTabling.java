@@ -25,7 +25,7 @@ public class UniversityTimeTabling {
         String unavailabilityFile = args[6];
 
         // Create the heuristic
-        Heuristic heuristic = new DoNothingHeuristic();
+        Heuristic heuristic = new HillClimber();
         heuristic.setTimeout(timeout);
         print("Using heuristic " + heuristic.getClass().getSimpleName());
 
