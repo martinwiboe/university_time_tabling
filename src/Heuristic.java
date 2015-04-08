@@ -210,9 +210,9 @@ public abstract class Heuristic {
         return result;
     }
     
-    public int evaluationFunction(Schedule schedule){
+public int evaluationFunction(Schedule schedule){
     	
-    	private int[] numberOfLecturesOfCourse = new int[basicInfo.courses];
+    	int[] numberOfLecturesOfCourse = new int[basicInfo.courses];
     	
     	for(int i=0; i < basicInfo.courses; i++){
     		numberOfLecturesOfCourse[i] = courses.numberOfLecturesForCourse[i];
@@ -220,7 +220,7 @@ public abstract class Heuristic {
     	
     	//to calculate the number of unallocated lectures of each course
     	for(int day= 0; day < basicInfo.days; day++){
-    		for(int period = 0; period < basicInfo.periods; period++){
+    		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int room = 0; room < basicInfo.rooms; room++){
     				int assignedCourse = schedule.assignments[day][period][room];
     				if(assignedCourse == -1)
@@ -232,7 +232,7 @@ public abstract class Heuristic {
     	
     	
     	//to calculate the number of days of each course that is scheduled below the minimum number of working days
-    	private int[] minimumWorkingDaysOfCourse = new int[basicInfo.courses];
+    	int[] minimumWorkingDaysOfCourse = new int[basicInfo.courses];
     	
     	for(int i=0; i < basicInfo.courses; i++){
     		minimumWorkingDaysOfCourse[i] = courses.minimumWorkingDaysForCourse[i];
@@ -245,7 +245,7 @@ public abstract class Heuristic {
     			dayFulfilled[i] = false;
     		}
     		
-    		for(int period = 0; period < basicInfo.periods; period++){
+    		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int room = 0; room < basicInfo.rooms; room++){
     				int assignedCourse = schedule.assignments[day][period][room];
     				if(assignedCourse == -1)
@@ -258,11 +258,11 @@ public abstract class Heuristic {
     		}
     	}
     	
-    	private int[][][] secludedLecture = new int[basicInfo.days][basicInfo.periods][basicInfo.curricula];
+    	int[][][] secludedLecture = new int[basicInfo.days][basicInfo.periodsPerDay][basicInfo.curricula];
     	
     	//Initialise the value of each slot in secludedLecture, 1 if a curriculum in a timeslot has a secluded lecture
     	for(int day = 0; day < basicInfo.days; day++){
-    		for(int period = 0; period < basicInfo.periods; period++){
+    		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
     				secludedLecture[day][period][curriculum] = 0;
     			}
@@ -271,7 +271,7 @@ public abstract class Heuristic {
     	
     	//to calculate the number of secluded lectures of each curriculum
     	for(int day = 0; day < basicInfo.days; day++){
-    		for(int period = 0; period < basicInfo.periods; period++){
+    		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
     				int count1 = 0; // to calculate X_c,t,r
     				int count2 = 0; // to calculate X_c',t',r'
@@ -297,7 +297,7 @@ public abstract class Heuristic {
     					}
     				}
     				
-    				if(adjacentPeriod2 < basicInfo.periods){
+    				if(adjacentPeriod2 < basicInfo.periodsPerDay){
     					for(int course = 0;course < basicInfo.courses; course++){
     						if(this.curriculum.isCourseInCurriculum[course][curriculum] == true){
     							for(int room = 0; room < basicInfo.rooms;room++){
@@ -315,7 +315,7 @@ public abstract class Heuristic {
     	}
     	
     	//to calculate number of room changes of each courses
-    	private int[] numberOfRoomChanges = new int[basicInfo.courses];
+    	int[] numberOfRoomChanges = new int[basicInfo.courses];
     	
     	//if the course is always taught in same room, the value is 0
     	//if the course is never allocated, the value is -1
@@ -331,7 +331,7 @@ public abstract class Heuristic {
         	}
         	
     		for(int day = 0; day < basicInfo.days; day++){
-    			for(int period = 0; period < basicInfo.periods; period++){
+    			for(int period = 0; period < basicInfo.periodsPerDay; period++){
         			for(int room = 0; room < basicInfo.rooms; room++){
         				if(schedule.assignments[day][period][room] == course)
         					roomChanged[room] = true;
@@ -346,10 +346,10 @@ public abstract class Heuristic {
     	}
     	
     	//to calculate the amount of capacity that room is exceeded in a timeslot
-    	private int leftOverCapacity = 0;
+    	int leftOverCapacity = 0;
     	
     	for(int day = 0; day < basicInfo.days; day++){
-    		for(int period = 0; period < basicInfo.periods; period++){
+    		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int room = 0; room < basicInfo.rooms; room++){
     				
     				int course = schedule.assignments[day][period][room];
@@ -376,7 +376,7 @@ public abstract class Heuristic {
     	}
     	
     	for(int day = 0; day < basicInfo.days; day++){
-    		for(int period = 0; period < basicInfo.periods; period++){
+    		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
     				objective += 2*secludedLecture[day][period][curriculum];
     			}
@@ -391,4 +391,5 @@ public abstract class Heuristic {
     	
     	return objective;
     }
+    
 }
