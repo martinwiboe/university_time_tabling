@@ -208,83 +208,187 @@ public abstract class Heuristic {
         }
         
         return result;
-        
-        /*
-        int slot;
-        //Haven't created the variable, assume they will be declared later
-        int totalSlot = basicInfo.days * basicInfo.periodsPerDay * basicInfo.rooms;
-        int course = basicInfo.courses;
-
-        int value = -1; //to assign specific value for each slot
-        int i,j,k;
-
-    	for(i=0;i< basicInfo.days;i++){
-    		for(j=0;j< basicInfo.periodsPerDay;j++){
-    			for(k=0;k<basicInfo.rooms;k++){
-
-    				assigments[i][j][k] = value;
-    				value--;
+    }
+    
+    public int evaluationFunction(Schedule schedule){
+    	
+    	private int[] numberOfLecturesOfCourse = new int[basicInfo.courses];
+    	
+    	for(int i=0; i < basicInfo.courses; i++){
+    		numberOfLecturesOfCourse[i] = courses.numberOfLecturesForCourse[i];
+    	}
+    	
+    	//to calculate the number of unallocated lectures of each course
+    	for(int day= 0; day < basicInfo.days; day++){
+    		for(int period = 0; period < basicInfo.periods; period++){
+    			for(int room = 0; room < basicInfo.rooms; room++){
+    				int assignedCourse = schedule.assignments[day][period][room];
+    				if(assignedCourse == -1)
+    					continue;
+    				numberOfLecturesOfCourse[assignedCourse]--;
     			}
     		}
     	}
-
-    	Random Rand = new Random();
-    	Vector<Integer> RemainRooms = new Vector<Integer>();
-
-    	for(slot =-1;i>-this.totalSlot;i--){
-    		RemainRoom.add(slot);
+    	
+    	
+    	//to calculate the number of days of each course that is scheduled below the minimum number of working days
+    	private int[] minimumWorkingDaysOfCourse = new int[basicInfo.courses];
+    	
+    	for(int i=0; i < basicInfo.courses; i++){
+    		minimumWorkingDaysOfCourse[i] = courses.minimumWorkingDaysForCourse[i];
     	}
-
-    	int assignedCourse= 0;
-
-    	do{
-    		do{
-    			do{
-    				do{
-    					int getDay;
-            			int getPeriod;
-            			int getRoom;
-
-            			Random Rand = new Random();
-            			int SlotSpot = Rand.nextInt(RemainRooms.size());
-            			slot = RemainRooms.elementAt(SlotSpot);
-
-            			for(i=0;i<this.Day;i++){
-            				for(j=0;j<this.Period;j++){
-            					for(k=0;k<this.room;k++){
-            						if (assigments[i][j][k] == slot){
-            							getDay = i;
-            							getPeriod = j;
-            							getRoom = k;
-            						}
-            					}
-            				}
-            			}
-    				}while(validateAvailabilityConstraint(getDay,getPeriod,assignedCourse) == false);
-
-    			}while(validateSameLecturerConstraint(getDay,getPeriod,getRoom,assignedCourse) == false);
-
-    		} while(validateSameCurriculumConstraint(getDay,getPeriod,getRoom,assignedCourse) == false);
-
-    		assignments[getDay][getPeriod][getRoom] = assignedCourse;
-    		RemainRooms.removeElementAt(SlotSpot);
-
-    		remainLecture[assignedCourse]--;
-    		if(rremainLecture[assignedCourse] == 0){
-    			assignedCourse++;
+    	
+    	for(int day = 0; day < basicInfo.days; day++){
+    		// to avoid overcount working days of each course
+    		boolean[] dayFulfilled = new boolean[basicInfo.courses];
+    		for(int i = 0; i < basicInfo.courses; i++){
+    			dayFulfilled[i] = false;
     		}
-    }while(assignedCourse < course);
-
-    	//assign -1 for all empty room
-
-    	for(i=0;i<this.NumberOfDay;i++){
-    		for(j=0;j<this.NumberOfPeriod;j++){
-    			for(k=0;k<this.NumberOfRoom;k++){
-    				if(assigments[i][j][k] < 0){
-    					assignments[i][j][k] = -1;
+    		
+    		for(int period = 0; period < basicInfo.periods; period++){
+    			for(int room = 0; room < basicInfo.rooms; room++){
+    				int assignedCourse = schedule.assignments[day][period][room];
+    				if(assignedCourse == -1)
+    					continue;
+    				if(dayFulfilled[assignedCourse] == true)
+    					continue;
+    				dayFulfilled[assignedCourse] = true;
+    				minimumWorkingDaysOfCourse[assignedCourse]--;
+    			}
+    		}
+    	}
+    	
+    	private int[][][] secludedLecture = new int[basicInfo.days][basicInfo.periods][basicInfo.curricula];
+    	
+    	//Initialise the value of each slot in secludedLecture, 1 if a curriculum in a timeslot has a secluded lecture
+    	for(int day = 0; day < basicInfo.days; day++){
+    		for(int period = 0; period < basicInfo.periods; period++){
+    			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
+    				secludedLecture[day][period][curriculum] = 0;
+    			}
+    		}
+    	}
+    	
+    	//to calculate the number of secluded lectures of each curriculum
+    	for(int day = 0; day < basicInfo.days; day++){
+    		for(int period = 0; period < basicInfo.periods; period++){
+    			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
+    				int count1 = 0; // to calculate X_c,t,r
+    				int count2 = 0; // to calculate X_c',t',r'
+    				for(int course = 0; course < basicInfo.courses; course++){
+    					if (this.curriculum.isCourseInCurriculum[course][curriculum] == true){
+    						for(int room = 0; room < basicInfo.rooms; room++){
+    	    					if(schedule.assignments[day][period][room] == course)
+    	    						count1++;
+    	    				}
+        				}
+    				}
+    				int adjacentPeriod1 = period - 1;
+    				int adjacentPeriod2 = period + 1;
+    				
+    				if(adjacentPeriod1 >= 0){
+    					for(int course = 0;course < basicInfo.courses; course++){
+    						if(this.curriculum.isCourseInCurriculum[course][curriculum] == true){
+    							for(int room = 0; room < basicInfo.rooms;room++){
+    								if(schedule.assignments[day][adjacentPeriod1][room] == course)
+    									count2++;
+    							}
+    						}
+    					}
+    				}
+    				
+    				if(adjacentPeriod2 < basicInfo.periods){
+    					for(int course = 0;course < basicInfo.courses; course++){
+    						if(this.curriculum.isCourseInCurriculum[course][curriculum] == true){
+    							for(int room = 0; room < basicInfo.rooms;room++){
+    								if(schedule.assignments[day][adjacentPeriod2][room] == course)
+    									count2++;	
+    							}
+    						}
+    					}
+    				}
+    				
+    				if(count1 == 1 && count2 == 0)
+    					secludedLecture[day][period][curriculum] = 1;
+    			}
+    		}
+    	}
+    	
+    	//to calculate number of room changes of each courses
+    	private int[] numberOfRoomChanges = new int[basicInfo.courses];
+    	
+    	//if the course is always taught in same room, the value is 0
+    	//if the course is never allocated, the value is -1
+    	for(int course = 0; course < basicInfo.courses; course++){
+    		numberOfRoomChanges[course] = -1;
+    	}
+    	
+    	for(int course = 0; course < basicInfo.courses; course++){ 
+    		boolean[] roomChanged = new boolean[basicInfo.rooms];
+        	
+        	for(int room = 0; room < basicInfo.rooms; room++){
+        		roomChanged[room] = false;
+        	}
+        	
+    		for(int day = 0; day < basicInfo.days; day++){
+    			for(int period = 0; period < basicInfo.periods; period++){
+        			for(int room = 0; room < basicInfo.rooms; room++){
+        				if(schedule.assignments[day][period][room] == course)
+        					roomChanged[room] = true;
+        			}
+    			}
+    		}
+    		
+    		for(int room = 0; room < basicInfo.rooms; room++){
+        		if(roomChanged[room] == true)
+        			numberOfRoomChanges[course]++;
+        	}	
+    	}
+    	
+    	//to calculate the amount of capacity that room is exceeded in a timeslot
+    	private int leftOverCapacity = 0;
+    	
+    	for(int day = 0; day < basicInfo.days; day++){
+    		for(int period = 0; period < basicInfo.periods; period++){
+    			for(int room = 0; room < basicInfo.rooms; room++){
+    				
+    				int course = schedule.assignments[day][period][room];
+    				if(course != -1){
+    					if(this.rooms.capacityForRoom[room] > this.courses.numberOfStudentsForCourse[course])
+        					leftOverCapacity += this.rooms.capacityForRoom[room] - this.courses.numberOfStudentsForCourse[course];
+        			}
+    				else if(course == -1){
+    					leftOverCapacity += this.rooms.capacityForRoom[room];
     				}
     			}
+    				
     		}
-    	}*/
+    	}
+    	
+    	int objective = 0; // calculate the penalties 
+    	
+    	for(int i = 0; i < basicInfo.courses; i++){
+    		objective += 10*numberOfLecturesOfCourse[i];
+    	}
+    	
+    	for(int course = 0; course < basicInfo.courses; course++){
+    		objective += 5*minimumWorkingDaysOfCourse[course];
+    	}
+    	
+    	for(int day = 0; day < basicInfo.days; day++){
+    		for(int period = 0; period < basicInfo.periods; period++){
+    			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
+    				objective += 2*secludedLecture[day][period][curriculum];
+    			}
+    		}
+    	}
+    	
+    	for(int course = 0; course < basicInfo.courses; course++){
+    		objective += numberOfRoomChanges[course];
+    	}
+    	
+    	objective += leftOverCapacity;
+    	
+    	return objective;
     }
 }

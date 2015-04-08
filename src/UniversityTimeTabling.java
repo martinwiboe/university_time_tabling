@@ -68,6 +68,11 @@ public class UniversityTimeTabling {
         print("Starting search...");
 
         Schedule solution = heuristic.search(initialSchedule);
+        
+        int objectiveValue;
+        print("Calculating objective value");
+        objectiveValue = heuristic.evaluationFunction(initialSchedule);
+        print("The value is " + objectiveValue);
 
         print("Found a solution!");
 
