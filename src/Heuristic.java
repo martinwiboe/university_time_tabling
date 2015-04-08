@@ -149,15 +149,18 @@ public abstract class Heuristic {
         for (int day = 0; day < basicInfo.days; day++) {
     		boolean[] courseAlreadyAssigned = new boolean[basicInfo.courses];
     		
-        	for (int period = 0; period < basicInfo.periods; period++) {
+        	for (int period = 0; period < basicInfo.periodsPerDay; period++) {
         		boolean[] lecturerBusy = new boolean[basicInfo.lecturers];
         		boolean[] curriculumBusy = new boolean[basicInfo.curricula];
         		for (int room = 0; room < basicInfo.rooms; room++) {
-        			int assignedCourse = 0; // fix
-        			int candidatecourse = 0;
+        			int assignedCourse = -1; // fix
+        			int candidatecourse = -1;
         			// find the course to assign, subject to
-        			while (assignedCourse == 0) {
-        				candidateCourse++; // maybe use a priority queue instead?
+        			while (assignedCourse == -1) {
+        				candidatecourse++; // maybe use a priority queue instead?
+        				
+        				if (candidatecourse == basicInfo.courses)
+        					break;
         				
 	        			// course not already assigned in time slot
         				if (courseAlreadyAssigned[candidatecourse])
@@ -168,7 +171,7 @@ public abstract class Heuristic {
         					continue;
         				
 	        			// course lecturer cannot be busy
-	        			if (lecturerBusy[courses.lecturerForCourse[candidatecourse])
+	        			if (lecturerBusy[courses.lecturerForCourse[candidatecourse]])
 	        				continue;
         				
         				// course curriculum cannot be busy
@@ -192,9 +195,12 @@ public abstract class Heuristic {
 	                    assignedCourse = candidatecourse;
         			}
         			
+        			if (assignedCourse == -1)
+        				continue;
+        			
         			// increment constraints
         			courseAlreadyAssigned[assignedCourse] = true;
-        			lecturerBusy[courses.lecturerForCourse[candidatecourse] = true;
+        			lecturerBusy[courses.lecturerForCourse[candidatecourse]] = true;
         			for (int curriculum = 0; curriculum < basicInfo.curricula; curriculum++) {
                         if (this.curriculum.isCourseInCurriculum[assignedCourse][curriculum]) {
                             curriculumBusy[curriculum] = true;
@@ -202,15 +208,15 @@ public abstract class Heuristic {
                     }
         			courseAssignmentCount[candidatecourse]++;
         			
-        			result.assignments[day][period[room] = assignedCourse;
+        			result.assignments[day][period][room] = assignedCourse;
         		}
         	}
         }
         
         return result;
-    }
+        }
     
-public int evaluationFunction(Schedule schedule){
+ public int evaluationFunction(Schedule schedule){
     	
     	int[] numberOfLecturesOfCourse = new int[basicInfo.courses];
     	
