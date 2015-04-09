@@ -360,14 +360,10 @@ public abstract class Heuristic {
     				
     				int course = schedule.assignments[day][period][room];
     				if(course != -1){
-    					if(this.rooms.capacityForRoom[room] > this.courses.numberOfStudentsForCourse[course])
-        					leftOverCapacity += this.rooms.capacityForRoom[room] - this.courses.numberOfStudentsForCourse[course];
+    					if(this.rooms.capacityForRoom[room] < this.courses.numberOfStudentsForCourse[course])
+        					leftOverCapacity += (this.courses.numberOfStudentsForCourse[course] - this.rooms.capacityForRoom[room]);
         			}
-    				else if(course == -1){
-    					leftOverCapacity += this.rooms.capacityForRoom[room];
-    				}
-    			}
-    				
+    			}		
     		}
     	}
     	
