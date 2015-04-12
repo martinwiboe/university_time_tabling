@@ -394,4 +394,23 @@ public abstract class Heuristic {
     	return objective;
     }
     
+	 	//[day][period][room]
+ 	protected void DeepClone(Schedule original,Schedule copy) {
+ 		for(int day=0;day<original.assignments.length;day++) {
+ 			for(int period =  0;period<original.assignments[day].length;period++) {
+ 				for(int room = 0;room<original.assignments[day][period].length;room++) {
+ 					//System.out.println("day = " + day + " period = "+period + " room = "+room);
+ 					copy.assignments[day][period][room] = original.assignments[day][period][room];
+ 				}
+ 			}
+ 		}
+		
+	}
+ 	
+ 	protected void swapCourse (int day1,int period1 ,int room1,int day2,int period2 ,int room2 , Schedule Content ) {
+ 		
+ 		int temp = Content.assignments[day1][period1][room1]; 
+ 		Content.assignments[day1][period1][room1] = Content.assignments[day2][period2][room2];
+ 		Content.assignments[day2][period2][room2] = temp;
+ 	}
 }
