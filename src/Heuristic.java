@@ -238,11 +238,6 @@ public abstract class Heuristic {
     		}
     	}
     	
-    	int unscheduled;
-    	for(int i=0; i <basicInfo.courses;i++){
-    		
-    	}
-    	
     	//to calculate the number of days of each course that is scheduled below the minimum number of working days
     	int[] minimumWorkingDaysOfCourse = new int[basicInfo.courses];
     	
@@ -374,28 +369,34 @@ public abstract class Heuristic {
     	}
     	
     	int objective = 0; // calculate the penalties 
+    	int unscheduled = 0;
+    	int minimumWorkingDays = 0;
+    	int curriculumCompactness = 0;
+    	int roomStability = 0;
     	
     	for(int i = 0; i < basicInfo.courses; i++){
-    		objective += 10*numberOfLecturesOfCourse[i];
+    		unscheduled += numberOfLecturesOfCourse[i];
     	}
     	
     	for(int course = 0; course < basicInfo.courses; course++){
-    		objective += 5*minimumWorkingDaysOfCourse[course];
+    		if(minimumWorkingDaysOfCourse[course] > 0)
+    		minimumWorkingDays += minimumWorkingDaysOfCourse[course];
     	}
     	
     	for(int day = 0; day < basicInfo.days; day++){
     		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int curriculum = 0; curriculum < basicInfo.curricula; curriculum++){
-    				objective += 2*secludedLecture[day][period][curriculum];
+    				curriculumCompactness += secludedLecture[day][period][curriculum];
     			}
     		}
     	}
     	
     	for(int course = 0; course < basicInfo.courses; course++){
-    		objective += numberOfRoomChanges[course];
+    		if(numberOfRoomChanges[course] > 0)
+    		roomStability= numberOfRoomChanges[course];
     	}
     	
-    	objective += leftOverCapacity;
+    	objective = 10*unscheduled + 5*minimumWorkingDays + 2*curriculumCompactness + roomStability + leftOverCapacity;
     	
     	return objective;
     }
