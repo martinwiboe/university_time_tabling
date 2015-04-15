@@ -236,6 +236,10 @@ public abstract class Heuristic {
     		}
     	}
     	
+    	int unscheduled
+    	for(int i=0; i <basicInfo.courses;i++){
+    		
+    	}
     	
     	//to calculate the number of days of each course that is scheduled below the minimum number of working days
     	int[] minimumWorkingDaysOfCourse = new int[basicInfo.courses];

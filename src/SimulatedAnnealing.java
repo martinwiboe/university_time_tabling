@@ -66,7 +66,7 @@ public class SimulatedAnnealing extends Heuristic{
 	    			}
 	    	}
 	    		deltaval = evaluationFunction(currentSchedule) - currentVal;
-	    		if(deltaval > 0) { 
+	    		if(deltaval < 0) { 
 	    			currentVal +=deltaval;
 	    			DeepClone(currentSchedule,schedule);//The best solution so far is saved
 	    		}
