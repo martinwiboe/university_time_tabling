@@ -393,9 +393,9 @@ public abstract class Heuristic {
     	
     	for(int course = 0; course < basicInfo.courses; course++){
     		if(numberOfRoomChanges[course] > 0)
-    		roomStability= numberOfRoomChanges[course];
+    		roomStability += numberOfRoomChanges[course];
     	}
-    	
+
     	objective = 10*unscheduled + 5*minimumWorkingDays + 2*curriculumCompactness + roomStability + leftOverCapacity;
     	
     	return objective;
