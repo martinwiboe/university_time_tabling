@@ -1,5 +1,6 @@
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Created by Martin on 05-04-2015.
@@ -92,6 +93,7 @@ public abstract class Heuristic {
     public Courses courses;
     public Unavailability unavailability;
     public Rooms rooms;
+    public int[] courseAssignmentCount;
 
     /**
      * Checks that courses in the same curriculum are not scheduled in the same time slots
@@ -144,7 +146,7 @@ public abstract class Heuristic {
 
     public Schedule getRandomInitialSolution(){
         Schedule result = new Schedule(basicInfo.days, basicInfo.periodsPerDay, basicInfo.rooms);
-        int[] courseAssignmentCount = new int[basicInfo.courses];
+        courseAssignmentCount = new int[basicInfo.courses];
         
         for (int day = 0; day < basicInfo.days; day++) {
     		boolean[] courseAlreadyAssigned = new boolean[basicInfo.courses];
@@ -411,10 +413,31 @@ public abstract class Heuristic {
 		
 	}
  	
- 	protected void swapCourse (int day1,int period1 ,int room1,int day2,int period2 ,int room2 , Schedule Content ) {
+ 	protected void SwapCourse (int day1,int period1 ,int room1,int day2,int period2 ,int room2 , Schedule Content ) {
  		
  		int temp = Content.assignments[day1][period1][room1]; 
  		Content.assignments[day1][period1][room1] = Content.assignments[day2][period2][room2];
  		Content.assignments[day2][period2][room2] = temp;
  	}
+
+ 	//delete and return the course number given schedule and time slots
+protected int RemoveCourse (int day,int period ,int room, Schedule Content ) { 
+		
+ 		if(Content.assignments[day][period][room]==-1) //there is no course in given time-room slot
+ 			return -1;
+ 		int tmp = Content.assignments[day][period][room];
+ 		Content.assignments[day][period][room]= -1;
+		return tmp;
+ 	}
+
+
+protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule Content ) {
+	
+		if(Content.assignments[day][period][room]!=-1) //first empty the time-room slot
+			return false;
+		Content.assignments[day][period][room] = courseNo;
+		return true;
+	}
+
+
 }
