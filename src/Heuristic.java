@@ -236,7 +236,7 @@ public abstract class Heuristic {
     		}
     	}
     	
-    	int unscheduled
+    	int unscheduled;
     	for(int i=0; i <basicInfo.courses;i++){
     		
     	}
