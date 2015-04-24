@@ -1,6 +1,7 @@
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * Created by Martin on 05-04-2015.
@@ -56,6 +57,8 @@ public abstract class Heuristic {
         long delta = (currentTime.getTime() - countdownStartTime) / 1000;
         return delta > timeout;
     }
+
+	public int iterationCount = 0;
 
     /**
      * Checks that courses with the same lecturer is not assigned in same time slots
@@ -144,6 +147,9 @@ public abstract class Heuristic {
         return true;
     }
 
+	private Random rand = new Random();
+	private boolean randomness = true;
+
     public Schedule getRandomInitialSolution(){
         Schedule result = new Schedule(basicInfo.days, basicInfo.periodsPerDay, basicInfo.rooms);
         courseAssignmentCount = new int[basicInfo.courses];
@@ -157,13 +163,23 @@ public abstract class Heuristic {
         		for (int room = 0; room < basicInfo.rooms; room++) {
         			int assignedCourse = -1; // fix
         			int candidatecourse = -1;
-        			// find the course to assign, subject to
+
+					int attempts = 0;
+
         			while (assignedCourse == -1) {
-        				candidatecourse++; // maybe use a priority queue instead?
-        				
-        				if (candidatecourse == basicInfo.courses)
-        					break;
-        				
+						if (randomness) {
+							candidatecourse = rand.nextInt(basicInfo.courses); // maybe use a priority queue instead?
+							attempts++;
+
+							if (attempts == basicInfo.courses * 5)
+								break;
+						} else {
+							candidatecourse++;
+							// we searched through all courses, but found no suitable candidate
+							if (candidatecourse == basicInfo.courses)
+								break;
+						}
+
 	        			// course not already assigned in time slot
         				if (courseAlreadyAssigned[candidatecourse])
         					continue;
