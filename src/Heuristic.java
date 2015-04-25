@@ -539,7 +539,7 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
      * Gets the value of the solution if the given time slot and room is emptied
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
      */
-    protected int valueIfSwappingCourses(Schedule schedule, int day, int room, int period,int day2,int period2,int room2) {
+    protected int valueIfSwappingCourses(Schedule schedule, int day, int period,int room,int day2,int period2,int room2) {
         // Room must currently be occupied
         int currentCourse = schedule.assignments[day][period][room];
         int currentCourse2 = schedule.assignments[day2][period2][room2];

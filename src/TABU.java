@@ -27,7 +27,6 @@ import java.util.Vector;
 	@Override
 	public Schedule search(Schedule schedule) {
 		startCountdown();
-		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
         courseAssignmentCount = getCourseAssignmentCount(schedule);
  	    System.out.println("Start");
@@ -50,7 +49,7 @@ import java.util.Vector;
  									//int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
  									int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
  									//TODO:also check the values if with emoving and adding methods
- 									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, room, period, day2, period2, room2);
+ 									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, period,room, day2, period2, room2);
  									if(currentValue>valueIfThisCoursesAreSwapped && IsTaboo(schedule.assignments[day][period][room], schedule.assignments[day2][period2][room2]) == false) {
  										currentValue = valueIfThisCoursesAreSwapped;
  										bestCourse1 = schedule.assignments[day][period][room];//Remembers the person for the taboolist
