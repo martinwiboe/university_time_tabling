@@ -147,12 +147,42 @@ public abstract class Heuristic {
         return true;
     }
 
-	private Random rand = new Random();
-	private boolean randomness = true;
+    /**
+     * Returns an array containing the number of times each course has been scheduled
+     */
+	protected int[] getCourseAssignmentCount(Schedule schedule) {
+        int[] result = new int[basicInfo.courses];
+        for (int day = 0; day < basicInfo.days; day++) {
+            for (int period = 0; period < basicInfo.periodsPerDay; period++) {
+                for (int room = 0; room < basicInfo.rooms; room++){
+                    int assignedCourse = schedule.assignments[day][period][room];
+                    if(assignedCourse == -1)
+                        continue;
+                    result[assignedCourse]++;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Validates that no course has been scheduled more than the minimum number of times.
+     * @return true if the constraint is not violated by the current schedule
+     */
+	public boolean validateMaximumScheduleCountConstraint(Schedule schedule) {
+        for (int course = 0; course < basicInfo.courses; course++) {
+            if (courseAssignmentCount[course] > courses.numberOfLecturesForCourse[course])
+                return false;
+        }
+        return true;
+	}
+
+	private Random rand = new XORShiftRandom();
 
     public Schedule getRandomInitialSolution(){
         Schedule result = new Schedule(basicInfo.days, basicInfo.periodsPerDay, basicInfo.rooms);
-        courseAssignmentCount = new int[basicInfo.courses];
+        int[] courseAssignmentCount = new int[basicInfo.courses];
         
         for (int day = 0; day < basicInfo.days; day++) {
     		boolean[] courseAlreadyAssigned = new boolean[basicInfo.courses];
@@ -167,18 +197,10 @@ public abstract class Heuristic {
 					int attempts = 0;
 
         			while (assignedCourse == -1) {
-						if (randomness) {
-							candidatecourse = rand.nextInt(basicInfo.courses); // maybe use a priority queue instead?
-							attempts++;
-
-							if (attempts == basicInfo.courses * 5)
-								break;
-						} else {
-							candidatecourse++;
-							// we searched through all courses, but found no suitable candidate
-							if (candidatecourse == basicInfo.courses)
-								break;
-						}
+                        candidatecourse = rand.nextInt(basicInfo.courses); // maybe use a priority queue instead?
+                            attempts++;
+                        if (attempts == basicInfo.courses * 2)
+                            break;
 
 	        			// course not already assigned in time slot
         				if (courseAlreadyAssigned[candidatecourse])
@@ -206,9 +228,7 @@ public abstract class Heuristic {
 	        			// course max lectures cannot be reached
 	                    if (courseAssignmentCount[candidatecourse] == courses.numberOfLecturesForCourse[candidatecourse])
 	                    	continue;
-	                    
-	        			// course minimum working days .... ?
-	                    
+
 	                    // no constraints violated! assign this course
 	                    assignedCourse = candidatecourse;
         			}
@@ -232,10 +252,10 @@ public abstract class Heuristic {
         }
         
         return result;
-        }
-    
- public int evaluationFunction(Schedule schedule){
-    	
+    }
+
+    public int evaluationFunction(Schedule schedule)
+    {
     	int[] numberOfLecturesOfCourse = new int[basicInfo.courses];
     	
     	for(int i=0; i < basicInfo.courses; i++){
@@ -457,4 +477,79 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
 	}
 
 
+    /**
+     * Gets the value of the solution if it is altered by assigning a specific course in a given time slot and room.
+     * This method return Integer.MAX_VALUE if the room is already occupied.
+     * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated.
+     */
+    protected int valueIfAssigningCourse(Schedule schedule, int day, int room, int period, int courseId) {
+        // Room must currently be empty
+        if (schedule.assignments[day][period][room] != HillClimberOld.EMPTY_ROOM) {
+            return Integer.MAX_VALUE;
+        }
+
+        // Assign the course
+        assignCourse(schedule, day, period, room, courseId);
+
+        // Validate all constraints
+        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint(schedule)) {
+            // Revert the change and return a large value
+            removeCourse(schedule, day, period, room);
+            return Integer.MAX_VALUE;
+        }
+
+        // Compute the value of the altered solution
+        int value = evaluationFunction(schedule);
+
+        // Revert the change and return the computed value
+        removeCourse(schedule, day, period, room);
+        return value;
+    }
+
+    /**
+     * Gets the value of the solution if the given time slot and room is emptied
+     * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
+     */
+    protected int valueIfRemovingCourse(Schedule schedule, int day, int room, int period) {
+        // Room must currently be occupied
+        int currentCourse = schedule.assignments[day][period][room];
+        if (currentCourse == HillClimberOld.EMPTY_ROOM) {
+            return Integer.MAX_VALUE;
+        }
+
+        // Empty the room
+        removeCourse(schedule, day, period, room);
+
+        // Validate constraints
+        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint(schedule)) {
+            // Proposed solution is invalid. Revert the change and return a large value.
+            assignCourse(schedule, day, period, room, currentCourse);
+            return Integer.MAX_VALUE;
+        }
+
+        // Compute the value of the altered solution
+        int value = evaluationFunction(schedule);
+
+        // Revert the change and return the computed value
+        assignCourse(schedule, day, period, room, currentCourse);
+        return value;
+    }
+
+    protected void assignCourse(Schedule schedule, int day, int period, int room, int course) {
+        // Make sure the room is empty
+        removeCourse(schedule, day, period, room);
+
+        // Perform the assignment and increment the counter
+        schedule.assignments[day][period][room] = course;
+        courseAssignmentCount[course]++;
+    }
+
+    protected void removeCourse(Schedule schedule, int day, int period, int room) {
+        int assignedCourse = schedule.assignments[day][period][room];
+        if (assignedCourse == HillClimberOld.EMPTY_ROOM)
+            return;
+
+        courseAssignmentCount[assignedCourse]--;
+        schedule.assignments[day][period][room] = HillClimberOld.EMPTY_ROOM;
+    }
 }

@@ -1,5 +1,9 @@
 import java.util.Random;
 
+/**
+ * A faster, higher-quality replacement for java.util.Random.
+ * See http://www.javamex.com/tutorials/random_numbers/xorshift.shtml
+ */
 public class XORShiftRandom extends Random {
     private long seed = System.nanoTime();
 
