@@ -4,12 +4,6 @@
 public class DoNothingHeuristic extends Heuristic {
     @Override
     public Schedule search(Schedule schedule) {
-        startCountdown();
-
-        while(timeoutReached() == false) {
-            // Do nothing.
-        }
-
         return schedule;
     }
 }
