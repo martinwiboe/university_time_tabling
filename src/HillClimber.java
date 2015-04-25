@@ -20,22 +20,23 @@ public class HillClimber extends Heuristic {
 	@Override
 	public Schedule search(Schedule schedule) {
 		startCountdown();
-	/*	unScheduledCourses = new HashMap<Integer,Integer>();
+		currentValue = evaluationFunction(schedule); // value of the current solution
+        courseAssignmentCount = getCourseAssignmentCount(schedule);
+		unScheduledCourses = new HashMap<Integer,Integer>();
 		for(int courseNo=0;courseNo<this.basicInfo.courses;courseNo++){ //checked the unscheduled course and the number of unscheduled lectures
 			int numberOfLecturesUnAssigned = this.courseAssignmentCount[courseNo] - this.courses.numberOfLecturesForCourse[courseNo];
 			if(numberOfLecturesUnAssigned != 0)
 				unScheduledCourses.put(courseNo, Math.abs(numberOfLecturesUnAssigned));
 		}
-		*/
+		
 		boolean done = false;
-		currentValue = evaluationFunction(schedule); // value of the current solution
-        courseAssignmentCount = getCourseAssignmentCount(schedule);
+		
 	    System.out.println("Start");
 		while(timeoutReached() == false) { //TODO: we need to deal with the d
 			done = true; //Runs while there are still changes being made
 			//System.out.println("Iteration Count = " + IterationCount);
 			this.IterationCount++; //Adds to the iteration count
-			if(this.IterationCount%100 == 0)
+			if(this.IterationCount%1000 == 0)
 			System.err.println("Iteration Count  = " + this.IterationCount );
 			int currentBestValue  = currentValue;
 			
@@ -46,10 +47,10 @@ public class HillClimber extends Heuristic {
 					for(int room = 0;room<this.basicInfo.rooms;room++){ //all the rooms
 
 							//	System.out.println("day = "+ day +" period = " + period + " room = " + room + " course  = " + schedule.assignments[day][period][room]);
-							/*		for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
+									for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
 										int unScheduledCourseNo = entry.getKey();
 										int unScheduledCourseValue = entry.getValue();
-										if(schedule.assignments[day][period][room] == HillClimberOld.EMPTY_ROOM) {// room is empty
+										if(schedule.assignments[day][period][room] == StochasticHillClimber.EMPTY_ROOM) {// room is empty
 											int valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, day, room, period, unScheduledCourseNo);
 											if(valueIfThisCourseIsAssigned<=currentValue) {
 												assignCourse(schedule, day, period, room, unScheduledCourseNo);
@@ -82,7 +83,7 @@ public class HillClimber extends Heuristic {
 										}
 										
 									}
-											*/
+											
 				    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 						int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
 						int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
