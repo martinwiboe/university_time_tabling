@@ -57,26 +57,6 @@ public class SimulatedAnnealing extends Heuristic{
 	    		period2 = Rand.nextInt(this.basicInfo.periodsPerDay);
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
-	    		SwapCourse(day1, period1, room1, day2, period2, room2, currentSchedule);
-	    		if(!validateSameLecturerConstraint(currentSchedule) || !validateSameCurriculumConstraint(currentSchedule) || !validateAvailabilityConstraint(currentSchedule)) {
-					SwapCourse(day2, period2, room2, day1, period1, room1, currentSchedule); //hard constrain violated swap again to previous schedule
-				}
-	    		else {
-	    			hardConstraintViolation  = false;	    		
-	    			}
-	    	}
-	    		deltaval = evaluationFunction(currentSchedule) - currentVal;
-	    		if(deltaval < 0) { 
-	    			currentVal +=deltaval;
-	    			DeepClone(currentSchedule,schedule);//The best solution so far is saved
-	    		}
-	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0) {
-	    			currentVal +=deltaval;
-	    			DeepClone(currentSchedule,schedule);//The best solution so far is saved
-	    		}
-	    		else {
-	    			SwapCourse(day2, period2, room2, day1, period1, room1, currentSchedule); //hard constrain violated swap again to previous schedule
-	    		}
 	    		temperature= temperature*tempchange; //Reduces the temperature
 	    
 	    	

@@ -575,10 +575,12 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
     protected void assignCourse(Schedule schedule, int day, int period, int room, int course) {
         // Make sure the room is empty
         removeCourse(schedule, day, period, room);
-
+        if(course == HillClimberOld.EMPTY_ROOM)
+        	return;
         // Perform the assignment and increment the counter
         schedule.assignments[day][period][room] = course;
         courseAssignmentCount[course]++;
+        
     }
 
     protected void removeCourse(Schedule schedule, int day, int period, int room) {

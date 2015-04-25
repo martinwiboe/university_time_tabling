@@ -2,6 +2,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.omg.PortableInterceptor.CurrentOperations;
+
 
 /**
  * Created by Burak on 08-04-2015.
@@ -11,7 +13,7 @@ public class HillClimber extends Heuristic {
 	protected Schedule schedule; //current schedule 
 	//protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
 	protected int IterationCount = 0;
-	protected int bestValue;
+	protected int currentValue;
 	private Random rand = new Random();
 	private Map<Integer,Integer> unScheduledCourses;
 	@Override
@@ -24,7 +26,7 @@ public class HillClimber extends Heuristic {
 				unScheduledCourses.put(courseNo, Math.abs(numberOfLecturesUnAssigned));
 		}
 		boolean done = false;
-		int bestValue  = evaluationFunction(schedule); //the bestvalue so far
+		currentValue  = evaluationFunction(schedule); //the bestvalue so far
 	    System.out.println("Start");
 		while(timeoutReached() == false) { //TODO: we need to deal with the d
 			done = true; //Runs while there are still changes being made
@@ -44,8 +46,25 @@ public class HillClimber extends Heuristic {
 									for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
 										int unScheduledCourseNo = entry.getKey();
 										int unScheduledCourseValue = entry.getValue();
-										int removedCourseNo = RemoveCourse(day, period, room, schedule);
+										if(schedule.assignments[day][period][room] == HillClimberOld.EMPTY_ROOM) {// room is empty
+											int valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, day, room, period, unScheduledCourseNo);
+											if(valueIfThisCourseIsAssigned<=currentValue) {
+												assignCourse(schedule, day, period, room, unScheduledCourseNo);
+												unScheduledCourseValue--;
+												if(unScheduledCourseValue == 0) {
+													unScheduledCourses.remove(unScheduledCourseNo);
+												}
+											}
+												
+										}
+										
+										else { //room ýs not epmty first we need to check the 
+											
+										}
+											
+										int removedCourseNo = RemoveCourse( day, period, room,schedule);
 										//fisrt remove the couse in current time-room slot and then we will add our unscheduled course
+										
 										if(!AddCourse(unScheduledCourseNo, day, period, room, schedule))
 											System.err.println("Add Couse Failed");
 										else {
@@ -82,9 +101,9 @@ public class HillClimber extends Heuristic {
 				
 			}
 			
-			if(currentBestValue<bestValue) {
+			if(currentBestValue<currentValue) {
 				done = false;
-				bestValue = currentBestValue;
+				currentValue = currentBestValue;
 			}
 		}
 		System.out.println("Hill Climber Found A Solution!");
