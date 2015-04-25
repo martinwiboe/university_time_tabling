@@ -21,7 +21,7 @@ public class SimulatedAnnealing extends Heuristic{
     private int bestCourse1;
     private int bestCourse2;
     private Random Rand = new XORShiftRandom();
-    private enum Type { REMOVE,ASSIGN,SWAP,NOTHING};
+   
     
     
 	public SimulatedAnnealing(double temperature,double tempchange) {
@@ -47,27 +47,23 @@ public class SimulatedAnnealing extends Heuristic{
 	    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 			int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
 			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
-			int day =0, period =0, room=0;
-			day  = Rand.nextInt(this.basicInfo.days);
-			room   = Rand.nextInt(this.basicInfo.rooms);
-    		period  = Rand.nextInt(this.basicInfo.periodsPerDay);
-    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day, room, period);
-    		int courseId = Rand.nextInt(this.basicInfo.courses);
-    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day, room, period, courseId);
-	    	while(((day1==day2)&&(period1==period2)&&(room1==room2))||hardConstraintViolation) {    		
+			int courseId = -1;
+	    	while(((day1==day2)&&(period1==period2)&&(room1==room2) || hardConstraintViolation) ) {    		
 	    		day1 = Rand.nextInt(this.basicInfo.days);
 	    		day2 = Rand.nextInt(this.basicInfo.days);
 	    		period1 = Rand.nextInt(this.basicInfo.periodsPerDay);
 	    		period2 = Rand.nextInt(this.basicInfo.periodsPerDay);
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room2  = Rand.nextInt(this.basicInfo.rooms);
-	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);
-	    		if(valueIfThisCoursesAreSwapped == Integer.MAX_VALUE)
-	    			hardConstraintViolation = true;
-	    		else 
-	    			hardConstraintViolation = false;
-	    		
+	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);	
+	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day1, room1, period1);
+	    		courseId = Rand.nextInt(this.basicInfo.courses);
+	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day1, room1, period1, courseId);
+	    		if(!(valueIfThisCoursesAreSwapped == Integer.MAX_VALUE && valueIfThisCourseIsRemoved == Integer.MAX_VALUE && valueIfThisCourseIsAssigned == Integer.MAX_VALUE))
+	    			hardConstraintViolation =  false;
+	
 	    	}
+	    	
 	    	Type change;
 	    	if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
 	    		if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
@@ -91,7 +87,7 @@ public class SimulatedAnnealing extends Heuristic{
 				deltaval =  valueIfThisCourseIsRemoved - currentValue;
 	    		if(deltaval < 0) { 
 	    			currentValue  +=deltaval;
-					removeCourse(schedule, day, period, room);
+					removeCourse(schedule, day1, period1, room1);
 	    		}
 	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0) {
 	    			currentValue +=deltaval;
@@ -103,11 +99,11 @@ public class SimulatedAnnealing extends Heuristic{
 				deltaval =  valueIfThisCourseIsAssigned - currentValue;
 	    		if(deltaval < 0) { 
 	    			currentValue  +=deltaval;
-					assignCourse(schedule, day, period, room, courseId);
+					assignCourse(schedule, day1, period1, room1, courseId);
 	    		}
 	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0) {
 	    			currentValue +=deltaval;
-	    			assignCourse(schedule, day, period, room, courseId);
+	    			assignCourse(schedule, day1, period1, room1, courseId);
 	    		}
 				break;
 			}

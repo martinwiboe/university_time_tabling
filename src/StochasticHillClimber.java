@@ -3,7 +3,7 @@ import java.util.Random;
 /**
  * Created by Burak on 08-04-2015.
  */
-public class HillClimberOld extends Heuristic {
+public class StochasticHillClimber extends Heuristic {
 
     public static final int EMPTY_ROOM = -1;
     protected int currentValue;

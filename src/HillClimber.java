@@ -5,6 +5,7 @@ import java.util.Random;
 import org.omg.PortableInterceptor.CurrentOperations;
 
 
+
 /**
  * Created by Burak on 08-04-2015.
  */
@@ -14,19 +15,21 @@ public class HillClimber extends Heuristic {
 	//protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
 	protected int IterationCount = 0;
 	protected int currentValue;
-	private Random rand = new Random();
+	private Random Rand = new XORShiftRandom();
 	private Map<Integer,Integer> unScheduledCourses;
 	@Override
 	public Schedule search(Schedule schedule) {
 		startCountdown();
-		unScheduledCourses = new HashMap<Integer,Integer>();
+	/*	unScheduledCourses = new HashMap<Integer,Integer>();
 		for(int courseNo=0;courseNo<this.basicInfo.courses;courseNo++){ //checked the unscheduled course and the number of unscheduled lectures
 			int numberOfLecturesUnAssigned = this.courseAssignmentCount[courseNo] - this.courses.numberOfLecturesForCourse[courseNo];
 			if(numberOfLecturesUnAssigned != 0)
 				unScheduledCourses.put(courseNo, Math.abs(numberOfLecturesUnAssigned));
 		}
+		*/
 		boolean done = false;
-		currentValue  = evaluationFunction(schedule); //the bestvalue so far
+		currentValue = evaluationFunction(schedule); // value of the current solution
+        courseAssignmentCount = getCourseAssignmentCount(schedule);
 	    System.out.println("Start");
 		while(timeoutReached() == false) { //TODO: we need to deal with the d
 			done = true; //Runs while there are still changes being made
@@ -34,7 +37,7 @@ public class HillClimber extends Heuristic {
 			this.IterationCount++; //Adds to the iteration count
 			if(this.IterationCount%100 == 0)
 			System.err.println("Iteration Count  = " + this.IterationCount );
-			int currentBestValue  = Integer.MAX_VALUE;
+			int currentBestValue  = currentValue;
 			
 			for(int day=0;day<this.basicInfo.days;day++) { //run thorough all the days
 
@@ -43,7 +46,7 @@ public class HillClimber extends Heuristic {
 					for(int room = 0;room<this.basicInfo.rooms;room++){ //all the rooms
 
 							//	System.out.println("day = "+ day +" period = " + period + " room = " + room + " course  = " + schedule.assignments[day][period][room]);
-									for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
+							/*		for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
 										int unScheduledCourseNo = entry.getKey();
 										int unScheduledCourseValue = entry.getValue();
 										if(schedule.assignments[day][period][room] == HillClimberOld.EMPTY_ROOM) {// room is empty
@@ -79,25 +82,78 @@ public class HillClimber extends Heuristic {
 										}
 										
 									}
-						/*			int day2 = rand.nextInt(this.basicInfo.days);
-									int period2 = rand.nextInt(this.basicInfo.periodsPerDay);
-									int room2 = rand.nextInt(this.basicInfo.rooms);
-									SwapCourse(day, period, room, day2, period2, room2, schedule);
-									//TODO:check all the hard constraints 
-									if(!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule)) {
-										SwapCourse(day2, period2, room2, day, period, room, schedule); //hard constrain violated swap again to previous schedule
-										continue;
-									}
-									int solVal = evaluationFunction(schedule);
-									if(solVal < currentBestValue) {
-										currentBestValue  =solVal;
-									}
-									else 
-										SwapCourse(day2, period2, room2, day, period, room, schedule); //hard constrain violated swap again to previous schedule
-								*/
+											*/
+				    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
+						int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
+						int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
+						int day2 =0, period2 =0, room2=0;
+						day2  = Rand.nextInt(this.basicInfo.days);
+						room2   = Rand.nextInt(this.basicInfo.rooms);
+			    		period2  = Rand.nextInt(this.basicInfo.periodsPerDay);
+			    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day, room, period);
+			    		int courseId = Rand.nextInt(this.basicInfo.courses);
+			    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day, room, period, courseId);
+			    		valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, day, period, room, day2, period2, room2);
+			    		Type change;
+				    	if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
+				    		if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
+				    			if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE)
+				    			 change = Type.REMOVE;
+				    			else 
+				    				change = Type.NOTHING;
+				    		}
+				    		else {
+				    			 change = Type.SWAP;
+				    		}
+				    	}
+				    	else {
+				    		if(valueIfThisCourseIsAssigned<valueIfThisCoursesAreSwapped)
+				    			change = Type.ASSIGN;
+				    		else 
+				    			change = Type.SWAP;
+				    	}
+				    	
+				    	int bestCourse1;
+				    	int bestCourse2;
+				    	int deltaval;
+				    	switch (change) {
+						case REMOVE:{
+							deltaval =  valueIfThisCourseIsRemoved - currentValue;
+				    		if(deltaval < 0) { 
+				    			currentValue  +=deltaval;
+								removeCourse(schedule, day, period, room);
+				    		}
+							break;
+						}
+						case ASSIGN: {
+							deltaval =  valueIfThisCourseIsAssigned - currentValue;
+				    		if(deltaval < 0) { 
+				    			currentValue  +=deltaval;
+								assignCourse(schedule, day, period, room, courseId);
+				    		}
+							break;
+						}
+						case SWAP: {
+							deltaval = valueIfThisCoursesAreSwapped - currentValue;
+				    		if(deltaval < 0) { 
+				    			currentValue  = valueIfThisCoursesAreSwapped;
+				    			bestCourse1 = schedule.assignments[day][period][room];//Remembers the person for the taboolist
+								bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
+								removeCourse(schedule, day2, period2, room2);
+								removeCourse(schedule, day, period, room);
+								assignCourse(schedule, day2, period2, room2, bestCourse1);
+								assignCourse(schedule, day, period, room, bestCourse2);
+				    		}
+							break;
+						}
+
+						default:
+							break;
+						}
 								}
 								
 							}
+		
 				
 			}
 			

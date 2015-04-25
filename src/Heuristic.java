@@ -484,7 +484,7 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
      */
     protected int valueIfAssigningCourse(Schedule schedule, int day, int room, int period, int courseId) {
         // Room must currently be empty
-        if (schedule.assignments[day][period][room] != HillClimberOld.EMPTY_ROOM) {
+        if (schedule.assignments[day][period][room] != StochasticHillClimber.EMPTY_ROOM) {
             return Integer.MAX_VALUE;
         }
 
@@ -513,7 +513,7 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
     protected int valueIfRemovingCourse(Schedule schedule, int day, int room, int period) {
         // Room must currently be occupied
         int currentCourse = schedule.assignments[day][period][room];
-        if (currentCourse == HillClimberOld.EMPTY_ROOM) {
+        if (currentCourse == StochasticHillClimber.EMPTY_ROOM) {
             return Integer.MAX_VALUE;
         }
 
@@ -575,7 +575,7 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
     protected void assignCourse(Schedule schedule, int day, int period, int room, int course) {
         // Make sure the room is empty
         removeCourse(schedule, day, period, room);
-        if(course == HillClimberOld.EMPTY_ROOM)
+        if(course == StochasticHillClimber.EMPTY_ROOM)
         	return;
         // Perform the assignment and increment the counter
         schedule.assignments[day][period][room] = course;
@@ -585,10 +585,12 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
 
     protected void removeCourse(Schedule schedule, int day, int period, int room) {
         int assignedCourse = schedule.assignments[day][period][room];
-        if (assignedCourse == HillClimberOld.EMPTY_ROOM)
+        if (assignedCourse == StochasticHillClimber.EMPTY_ROOM)
             return;
 
         courseAssignmentCount[assignedCourse]--;
-        schedule.assignments[day][period][room] = HillClimberOld.EMPTY_ROOM;
+        schedule.assignments[day][period][room] = StochasticHillClimber.EMPTY_ROOM;
     }
+    
+    protected enum Type { REMOVE,ASSIGN,SWAP,NOTHING};
 }
