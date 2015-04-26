@@ -134,7 +134,6 @@ public class SimulatedAnnealing extends Heuristic{
 				break;
 			}
 	    	
-	    		
 	    		temperature= temperature*tempchange; //Reduces the temperature
 	    
 	    	
