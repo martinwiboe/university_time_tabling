@@ -32,7 +32,7 @@ public class HillClimber extends Heuristic {
 		boolean done = false;
 		
 	    System.out.println("Start");
-		while(timeoutReached() == false) { //TODO: we need to deal with the d
+		while(!timeoutReached() && !done) { 
 			done = true; //Runs while there are still changes being made
 			//System.out.println("Iteration Count = " + IterationCount);
 			this.IterationCount++; //Adds to the iteration count
@@ -47,7 +47,7 @@ public class HillClimber extends Heuristic {
 					for(int room = 0;room<this.basicInfo.rooms;room++){ //all the rooms
 
 							//	System.out.println("day = "+ day +" period = " + period + " room = " + room + " course  = " + schedule.assignments[day][period][room]);
-									for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
+							/*		for (Map.Entry<Integer, Integer> entry : unScheduledCourses.entrySet()){
 										int unScheduledCourseNo = entry.getKey();
 										int unScheduledCourseValue = entry.getValue();
 										if(schedule.assignments[day][period][room] == StochasticHillClimber.EMPTY_ROOM) {// room is empty
@@ -83,7 +83,7 @@ public class HillClimber extends Heuristic {
 										}
 										
 									}
-											
+											*/
 				    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 						int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
 						int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
@@ -91,34 +91,35 @@ public class HillClimber extends Heuristic {
 						day2  = Rand.nextInt(this.basicInfo.days);
 						room2   = Rand.nextInt(this.basicInfo.rooms);
 			    		period2  = Rand.nextInt(this.basicInfo.periodsPerDay);
-			    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day, room, period);
+			    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day, room, period); //calculate the value if we remove the course given timeslot
 			    		int courseId = Rand.nextInt(this.basicInfo.courses);
-			    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day, room, period, courseId);
-			    		valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, day, period, room, day2, period2, room2);
+			    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day, room, period, courseId); //calculate the value if we swap the courses given timeslots
+			    		valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
 			    		Type change;
+			    		//we have the new values now we need to choose which action would be the best according to new values
 				    	if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
 				    		if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
-				    			if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE)
-				    			 change = Type.REMOVE;
+				    			if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE) 
+				    			 change = Type.REMOVE;//if removing the course gives the best value then choose remove
 				    			else 
-				    				change = Type.NOTHING;
+				    				change = Type.NOTHING;//that means we have Max_int value so we do nothing in this iteration
 				    		}
 				    		else {
-				    			 change = Type.SWAP;
+				    			 change = Type.SWAP;//choose swap if the swapping gives the best value
 				    		}
 				    	}
 				    	else {
 				    		if(valueIfThisCourseIsAssigned<valueIfThisCoursesAreSwapped)
-				    			change = Type.ASSIGN;
+				    			change = Type.ASSIGN; //choose assign if the assigning gives the best value
 				    		else 
-				    			change = Type.SWAP;
+				    			change = Type.SWAP;//choose swap if the swapping gives the best value
 				    	}
 				    	
 				    	int bestCourse1;
 				    	int bestCourse2;
 				    	int deltaval;
 				    	switch (change) {
-						case REMOVE:{
+						case REMOVE:{ 
 							deltaval =  valueIfThisCourseIsRemoved - currentValue;
 				    		if(deltaval < 0) { 
 				    			currentValue  +=deltaval;
@@ -138,8 +139,8 @@ public class HillClimber extends Heuristic {
 							deltaval = valueIfThisCoursesAreSwapped - currentValue;
 				    		if(deltaval < 0) { 
 				    			currentValue  = valueIfThisCoursesAreSwapped;
-				    			bestCourse1 = schedule.assignments[day][period][room];//Remembers the person for the taboolist
-								bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
+				    			bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for to assign
+								bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the course for to assign
 								removeCourse(schedule, day2, period2, room2);
 								removeCourse(schedule, day, period, room);
 								assignCourse(schedule, day2, period2, room2, bestCourse1);
