@@ -67,7 +67,7 @@ public class HillClimber extends Heuristic {
 										}
 											
 										int removedCourseNo = RemoveCourse( day, period, room,schedule);
-										//fisrt remove the couse in current time-room slot and then we will add our unscheduled course
+										//fisrt remove the course in current time-room slot and then we will add our unscheduled course
 										
 										if(!AddCourse(unScheduledCourseNo, day, period, room, schedule))
 											System.err.println("Add Couse Failed");
@@ -158,14 +158,13 @@ public class HillClimber extends Heuristic {
 		
 				
 			}
-			
 			if(currentBestValue<currentValue) {
 				done = false;
 				currentValue = currentBestValue;
 			}
+			
 		}
-		System.out.println("Hill Climber Found A Solution!");
-		System.out.println("value  = "+evaluationFunction(schedule));
+		
 		return schedule;
 	}	
 }
