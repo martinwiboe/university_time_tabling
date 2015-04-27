@@ -102,7 +102,7 @@ public class SimulatedAnnealing extends Heuristic{
 	    		}
 	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0) {
 	    			currentValue +=deltaval;
-					removeCourse(schedule, day2, period2, room2);
+					removeCourse(schedule, day1, period1, room1);
 	    		}
 				break;
 			}
