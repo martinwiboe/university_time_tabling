@@ -57,7 +57,7 @@ public class SimulatedAnnealing extends Heuristic{
 	    	boolean hardConstraintViolation = true;
 	    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 			int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
-			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
+			//int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
 			int courseId = -1;
 	    	while(((day1==day2)&&(period1==period2)&&(room1==room2) || hardConstraintViolation) ) {    		
 	    		day1 = Rand.nextInt(this.basicInfo.days);
@@ -66,32 +66,25 @@ public class SimulatedAnnealing extends Heuristic{
 	    		period2 = Rand.nextInt(this.basicInfo.periodsPerDay);
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room2  = Rand.nextInt(this.basicInfo.rooms);
-	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);	
+	    		//valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);	
 	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day1, room1, period1);
 	    		courseId = Rand.nextInt(this.basicInfo.courses);
 	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day1, room1, period1, courseId);
-	    		if(!(valueIfThisCoursesAreSwapped == Integer.MAX_VALUE && valueIfThisCourseIsRemoved == Integer.MAX_VALUE && valueIfThisCourseIsAssigned == Integer.MAX_VALUE))
+	    		if(!( valueIfThisCourseIsRemoved == Integer.MAX_VALUE && valueIfThisCourseIsAssigned == Integer.MAX_VALUE))
 	    			hardConstraintViolation =  false;
 	
 	    	}
 	    	
 	    	Type change;
 	    	if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
-	    		if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
 	    			if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE)
 	    			 change = Type.REMOVE;
 	    			else 
 	    				change = Type.NOTHING;
-	    		}
-	    		else {
-	    			 change = Type.SWAP;
-	    		}
+	    		
 	    	}
 	    	else {
-	    		if(valueIfThisCourseIsAssigned<valueIfThisCoursesAreSwapped)
-	    			change = Type.ASSIGN;
-	    		else 
-	    			change = Type.SWAP;
+	    		change = Type.ASSIGN;
 	    	}
 	    	switch (change) {
 			case REMOVE:{
@@ -115,28 +108,6 @@ public class SimulatedAnnealing extends Heuristic{
 	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0) {
 	    			currentValue +=deltaval;
 	    			assignCourse(schedule, day1, period1, room1, courseId);
-	    		}
-				break;
-			}
-			case SWAP: {
-				deltaval = valueIfThisCoursesAreSwapped - currentValue;
-	    		if(deltaval < 0) { 
-	    			currentValue  = valueIfThisCoursesAreSwapped;
-	    			bestCourse1 = schedule.assignments[day1][period1][room1];//Remembers the person for the taboolist
-					bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
-					removeCourse(schedule, day2, period2, room2);
-					removeCourse(schedule, day1, period1, room1);
-					assignCourse(schedule, day2, period2, room2, bestCourse1);
-					assignCourse(schedule, day1, period1, room1, bestCourse2);
-	    		}
-	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0 ) {
-	    			currentValue  = valueIfThisCoursesAreSwapped;
-	    			bestCourse1 = schedule.assignments[day1][period1][room1];//Remembers the person for the taboolist
-					bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
-					removeCourse(schedule, day2, period2, room2);
-					removeCourse(schedule, day1, period1, room1);
-					assignCourse(schedule, day2, period2, room2, bestCourse1);
-					assignCourse(schedule, day1, period1, room1, bestCourse2);
 	    		}
 				break;
 			}

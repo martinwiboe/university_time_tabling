@@ -269,29 +269,55 @@ public class StochasticTABU extends Heuristic {
 	{
 		
 		if(dayPeriodRoom2[0] == REMOVENO) {
-			
-		}
-		else if ()
-		for (int i = 0 ; i < this.tabooList1.size(); i++)
-		{
-			
-			if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
+			for (int i = 0 ; i < this.tabooList1.size(); i++)
 			{
-				if(tabooListSlots2.elementAt(i)[0] == dayPeriodRoom2[0] && tabooListSlots2.elementAt(i)[1] == dayPeriodRoom2[1] && tabooListSlots2.elementAt(i)[2] == dayPeriodRoom2[2])
+				
+				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
 				{
-					return true;
-				}
+					if(tabooListSlots2.elementAt(i)[0] == ASSIGNNO)
+					{
+						return true;
+					}
+				}				
 			}
-			if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom2[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom2[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom2[2] )  
-			{
-				if(tabooListSlots2.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots2.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots2.elementAt(i)[2] == dayPeriodRoom1[2])
-				{
-					return true;
-				}
-			}
-			
-			
 		}
+		else if (dayPeriodRoom2[0] == ASSIGNNO) {
+			for (int i = 0 ; i < this.tabooList1.size(); i++)
+			{
+				
+				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
+				{
+					if(tabooListSlots2.elementAt(i)[0] == REMOVENO)
+					{
+						return true;
+					}
+				}				
+			}
+		}
+		
+		else {
+			for (int i = 0 ; i < this.tabooList1.size(); i++)
+			{
+				
+				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
+				{
+					if(tabooListSlots2.elementAt(i)[0] == dayPeriodRoom2[0] && tabooListSlots2.elementAt(i)[1] == dayPeriodRoom2[1] && tabooListSlots2.elementAt(i)[2] == dayPeriodRoom2[2])
+					{
+						return true;
+					}
+				}
+				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom2[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom2[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom2[2] )  
+				{
+					if(tabooListSlots2.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots2.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots2.elementAt(i)[2] == dayPeriodRoom1[2])
+					{
+						return true;
+					}
+				}
+				
+				
+			}
+		}
+
 		return false;
 
 	}
