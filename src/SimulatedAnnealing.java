@@ -13,6 +13,7 @@ public class SimulatedAnnealing extends Heuristic{
 	protected Schedule schedule; //current schedule 
 	protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
 	protected int currentValue;
+	protected int previousValue = Integer.MAX_VALUE;
     private double temperature;
     private double tempchange;
     private int deltaval;
@@ -147,14 +148,17 @@ public class SimulatedAnnealing extends Heuristic{
 	    	// TODO write results to a CSV file
        
 	    		 temperature= temperature*tempchange; //Reduces the temperature
-	    		 if(iterationCount%10000 == 0) {
+	    		 if((float)Math.abs(previousValue-currentValue)/currentValue >= 0.05 ) {
 	    			 result = new String[] { "" + iterationCount, currentValue + "" };
 		    	     writer.writeNext(result);
+		    	     previousValue = currentValue;
 	    		 }
 	    		 
 	    	
 	}
-	   
+	    
+	    result = new String[] { "" + iterationCount, currentValue + "" };
+	    writer.writeNext(result);
 	    writer.flush();
         f.close();
 		return schedule;
