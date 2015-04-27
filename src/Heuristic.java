@@ -581,4 +581,5 @@ public abstract class Heuristic {
     protected enum Type { REMOVE,ASSIGN,SWAP,NOTHING};
     protected CSVWriter writer = null;
     protected Writer f;
+    
 }

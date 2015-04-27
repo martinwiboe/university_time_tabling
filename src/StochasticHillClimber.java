@@ -1,6 +1,7 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
+import java.util.UUID;
 
 import com.opencsv.CSVWriter;
 
@@ -16,7 +17,8 @@ public class StochasticHillClimber extends Heuristic {
     
     public  StochasticHillClimber() throws IOException {
 		super();
-		 f = new FileWriter(this.getClass()+"iterationValue.csv");
+		 String uuid = UUID.randomUUID().toString();
+		 f = new FileWriter(this.getClass()+uuid+"iterationValue.csv");
 	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 	}
 
@@ -25,7 +27,8 @@ public class StochasticHillClimber extends Heuristic {
         startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
         courseAssignmentCount = getCourseAssignmentCount(schedule);
-
+        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+       	writer.writeNext(result);
         int rooms = this.basicInfo.rooms;
         int days = this.basicInfo.days;
         int periods = this.basicInfo.periodsPerDay;
@@ -60,7 +63,7 @@ public class StochasticHillClimber extends Heuristic {
                 }
             }
             if(iterationCount%10000 == 0){
-           	 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+           	 result = new String[] { "" + iterationCount, currentValue + "" };
        	     writer.writeNext(result);
             }
         }

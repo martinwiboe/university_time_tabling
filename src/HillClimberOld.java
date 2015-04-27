@@ -1,5 +1,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.Vector;
 
 import com.opencsv.CSVWriter;
@@ -20,7 +21,8 @@ import com.opencsv.CSVWriter;
 	
 	public HillClimberOld() throws IOException {
 		super();
-		 f = new FileWriter(this.getClass()+"iterationValue.csv");
+		 String uuid = UUID.randomUUID().toString();
+		 f = new FileWriter(this.getClass()+uuid+"iterationValue.csv");
 	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 	}
 
@@ -29,6 +31,8 @@ import com.opencsv.CSVWriter;
 	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
+        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+       	writer.writeNext(result);
         courseAssignmentCount = getCourseAssignmentCount(schedule);
         boolean done = false;
  	    System.out.println("Start");
@@ -80,7 +84,7 @@ import com.opencsv.CSVWriter;
 			
  			
 			
-	           	 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	           	result = new String[] { "" + iterationCount, currentValue + "" };
 	       	     writer.writeNext(result);
 	            
 	        }

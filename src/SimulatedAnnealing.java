@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 
 import com.opencsv.CSVWriter;
 
@@ -31,7 +32,8 @@ public class SimulatedAnnealing extends Heuristic{
 		this.temperature = temperature;
 		this.tempchange = tempchange;
 		// write iteration value to a CSV file
-	     f = new FileWriter(this.getClass()+Float.toString((float) temperature)+Float.toString((float) tempchange)+"iterationValue.csv");
+		String uuid = UUID.randomUUID().toString();
+	     f = new FileWriter(this.getClass()+Float.toString((float) temperature)+Float.toString((float) tempchange)+uuid+"iterationValue.csv");
 	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 	}
 
@@ -43,6 +45,8 @@ public class SimulatedAnnealing extends Heuristic{
 		System.out.println("Start");
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
+        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	    writer.writeNext(result);
         courseAssignmentCount = getCourseAssignmentCount(schedule);
 	    while(!timeoutReached()) {
 	    	this.iterationCount++; //Adds to the iteration count
@@ -144,7 +148,7 @@ public class SimulatedAnnealing extends Heuristic{
        
 	    		 temperature= temperature*tempchange; //Reduces the temperature
 	    		 if(iterationCount%10000 == 0) {
-	    			 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	    			 result = new String[] { "" + iterationCount, currentValue + "" };
 		    	     writer.writeNext(result);
 	    		 }
 	    		 

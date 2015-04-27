@@ -1,6 +1,7 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.UUID;
 import java.util.Vector;
 
 import com.opencsv.CSVWriter;
@@ -25,7 +26,8 @@ import com.opencsv.CSVWriter;
         this.tabooLength = TabooLength;
         tabooList1  = new Vector<Integer[]>();
         tabooList2  = new Vector<Integer[]>();
-        f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+"iterationValue.csv");
+        String uuid = UUID.randomUUID().toString();
+        f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+uuid+"iterationValue.csv");
 	    writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
         
     }
@@ -34,6 +36,8 @@ import com.opencsv.CSVWriter;
 	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
+        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+       	writer.writeNext(result);
         courseAssignmentCount = getCourseAssignmentCount(schedule);
  	    System.out.println("Start");
 		while(timeoutReached() == false) {
@@ -87,7 +91,7 @@ import com.opencsv.CSVWriter;
  
  			}
 			AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //Makes the swap back taboo.
-	        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	        result = new String[] { "" + iterationCount, currentValue + "" };
 	       	writer.writeNext(result);
 	        }
 	    writer.flush();

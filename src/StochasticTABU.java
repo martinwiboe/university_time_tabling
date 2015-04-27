@@ -1,6 +1,7 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
+import java.util.UUID;
 import java.util.Vector;
 
 import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
@@ -29,7 +30,8 @@ public class StochasticTABU extends Heuristic {
 		this.tabooLength = TabooLength;
 		tabooList1  = new Vector<Integer>();
 		tabooList2  = new Vector<Integer>();
-		 f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+"iterationValue.csv");
+		 String uuid = UUID.randomUUID().toString();
+		 f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+uuid+"iterationValue.csv");
 	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 
 	}
@@ -38,6 +40,8 @@ public class StochasticTABU extends Heuristic {
 	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
 		currentValue = evaluationFunction(schedule); // value of the current solution
+		String[] result = new String[] { "" + iterationCount, currentValue + "" };
+       	writer.writeNext(result);
 		courseAssignmentCount = getCourseAssignmentCount(schedule);
 		int rooms = this.basicInfo.rooms;
 		int days = this.basicInfo.days;
@@ -123,7 +127,7 @@ public class StochasticTABU extends Heuristic {
 			
 
 	    	 if(iterationCount%10000 == 0){
-	           	 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	           	 result = new String[] { "" + iterationCount, currentValue + "" };
 	       	     writer.writeNext(result);
 	            }
 	        }
