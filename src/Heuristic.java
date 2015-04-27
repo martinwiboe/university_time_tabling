@@ -436,21 +436,15 @@ public abstract class Heuristic {
             return Integer.MAX_VALUE;
         }
 
-        int delta = deltaState.getDeltaWhenAdding(day, period, room, courseId);
-
-        // Assign the course
-        assignCourse(schedule, day, period, room, courseId);
-
-        // Validate all constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
-            // Revert the change and return a large value
-            removeCourse(schedule, day, period, room);
+        // Ensure that the move is valid
+        boolean moveIsValid = deltaState.deltaValidateAllConstraints(day, period, courseId);
+        if (!moveIsValid) {
+            // Return a large value to indicate that the move is invalid
             return Integer.MAX_VALUE;
         }
 
-        // Revert the change and return the computed value
-        removeCourse(schedule, day, period, room);
-		
+        int delta = deltaState.getDeltaWhenAdding(day, period, room, courseId);
+
         return currentValue + delta;
     }
     /**
@@ -463,18 +457,8 @@ public abstract class Heuristic {
         if (currentCourse == Heuristic.EMPTY_ROOM) {
             return Integer.MAX_VALUE;
         }
-        // Empty the room
-        removeCourse(schedule, day, period, room);
-	
-        // Validate constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
-            // Proposed solution is invalid. Revert the change and return a large value.
-            assignCourse(schedule, day, period, room, currentCourse);
-            return Integer.MAX_VALUE;
-        }
-        // Revert the change and return the computed value
-        assignCourse(schedule, day, period, room, currentCourse);
 
+        // Return the delta value plus the current value
         int delta = deltaState.getDeltaWhenRemoving(day, period, room, currentCourse);
         return currentValue + delta;
     }
@@ -561,38 +545,39 @@ public abstract class Heuristic {
 
         int totalDelta = 0;
 
-        // Swap the rooms
+        // First clear both rooms -- this does not require constraint validation
         totalDelta += deltaState.getDeltaWhenRemoving(day, period, room, currentCourse);
         removeCourse(schedule, day, period, room);
 
         totalDelta += deltaState.getDeltaWhenRemoving(day2, period2, room2, currentCourse2);
         removeCourse(schedule, day2, period2, room2);
 
+        // Then check the delta values if adding the swapped courses
+        boolean constraintsSatisfied;
         totalDelta += deltaState.getDeltaWhenAdding(day2, period2, room2, currentCourse);
-        assignCourse(schedule, day2, period2, room2, currentCourse);
+        constraintsSatisfied = deltaState.deltaValidateAllConstraints(day2, period2, currentCourse);
 
-        totalDelta += deltaState.getDeltaWhenAdding(day, period, room, currentCourse2);
-        assignCourse(schedule, day, period, room, currentCourse2);
-
-        // Validate constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
-            // Proposed solution is invalid. Revert the change and return a large value.
-        	removeCourse(schedule, day, period, room);
-            removeCourse(schedule, day2, period2, room2);
-            assignCourse(schedule, day, period, room, currentCourse);
-            assignCourse(schedule, day2, period2, room2, currentCourse2);
-            return Integer.MAX_VALUE;
+        if (constraintsSatisfied) {
+            // only compute the second delta if the first constraint is satistified
+            totalDelta += deltaState.getDeltaWhenAdding(day, period, room, currentCourse2);
+            constraintsSatisfied = deltaState.deltaValidateAllConstraints(day, period, currentCourse2);
         }
 
-        // Revert the change and return the computed value
-        removeCourse(schedule, day, period, room);
-        removeCourse(schedule, day2, period2, room2);
+        // Revert the changes by reassigning the courses. Then return the computed value.
         assignCourse(schedule, day, period, room, currentCourse);
         assignCourse(schedule, day2, period2, room2, currentCourse2);
 
+        if (!constraintsSatisfied) {
+            return Integer.MAX_VALUE;
+        }
+
         return currentValue + totalDelta;
     }
-    
+
+    /**
+     * Assigns the given course to the given room and time slot.
+     * If the room is already occupied, this method does nothing.
+     */
     protected void assignCourse(Schedule schedule, int day, int period, int room, int course) {
         // Make sure the room is empty
         removeCourse(schedule, day, period, room);
@@ -611,8 +596,14 @@ public abstract class Heuristic {
         for (int q : curriculum.curriculaForCourse.get(course)) {
             deltaState.curriculumAssigned[q][day][period]++;
         }
+
+        deltaState.lecturerBusy[courses.lecturerForCourse[course]][day][period]++;
     }
 
+    /**
+     * Empties the given room in the given time slot.
+     * If the room is already empty, this method does nothing.
+     */
     protected void removeCourse(Schedule schedule, int day, int period, int room) {
         int assignedCourse = schedule.assignments[day][period][room];
         if (assignedCourse == Heuristic.EMPTY_ROOM)
@@ -630,6 +621,8 @@ public abstract class Heuristic {
         for (int q : curriculum.curriculaForCourse.get(assignedCourse)) {
             deltaState.curriculumAssigned[q][day][period]--;
         }
+
+        deltaState.lecturerBusy[courses.lecturerForCourse[assignedCourse]][day][period]--;
     }
 
     protected enum Type { REMOVE, ASSIGN, SWAP, NOTHING }
@@ -705,6 +698,11 @@ public abstract class Heuristic {
         public int[][] lecturesInRoomForCourse;
 
         /**
+         * Look up whether a lecturer is busy on a give time using [lecturer][day][period]
+         */
+        public byte[][][] lecturerBusy;
+
+        /**
          * Look up whether a given curriculum is assigned on a day and period.
          * Use indexing [curriculum][day][period]
          */
@@ -716,6 +714,7 @@ public abstract class Heuristic {
             courseLecturesOnDay = new int[basicInfo.courses][basicInfo.days];
             courseWorkingDays = new int[basicInfo.courses];
             lecturesInRoomForCourse = new int[basicInfo.rooms][basicInfo.courses];
+            lecturerBusy = new byte[basicInfo.lecturers][basicInfo.days][basicInfo.periodsPerDay];
 
             for (int day = 0; day < basicInfo.days; day++) {
                 for (int period = 0; period < basicInfo.periodsPerDay; period++) {
@@ -726,6 +725,10 @@ public abstract class Heuristic {
 
                         courseLecturesOnDay[course][day]++;
                         lecturesInRoomForCourse[room][course]++;
+
+                        int lecturerId = courses.lecturerForCourse[course];
+                        lecturerBusy[lecturerId][day][period]++;
+                        assert lecturerBusy[lecturerId][day][period] == 1;
 
                         for (int q : curriculum.curriculaForCourse.get(course)) {
                             curriculumAssigned[q][day][period] = 1;
@@ -944,5 +947,57 @@ public abstract class Heuristic {
             return penaltyDelta;
         }
 
+        /**
+         * Checks that a given course can be added in the given time slot without violating the SameCurriculum constraint.
+         * @return true if the constraint is satisfied
+         */
+        public boolean deltaValidateSameCurriculumConstraint(int day, int period, int course) {
+            LinkedList<Integer> curricula = curriculum.curriculaForCourse.get(course);
+            for (int curriculum : curricula) {
+                if (curriculumAssigned[curriculum][day][period] > 0)
+                    return false;
+            }
+            return true;
+        }
+
+        /**
+         * Checks that a given course can be added in the given time slot without violating the SameLecturer constraint.
+         * @return true if the constraint is satisfied
+         */
+        public boolean deltaValidateSameLecturerConstraint(int day, int period, int course) {
+            int lecturer = courses.lecturerForCourse[course];
+            return lecturerBusy[lecturer][day][period] == 0;
+        }
+
+        /**
+         * Checks that a given course can be added in the given time slot without violating the Unavailability constraint.
+         * @return true if the constraint is satisfied
+         */
+        public boolean deltaValidateUnavailabilityConstraint(int day, int period, int course) {
+            return !unavailability.courseUnavailable[day][period][course];
+        }
+
+        /**
+         * Checks that a lecture can be added for a given course without violating the MaximimumLectures constraint
+         * @return true if the constraint is not violated by the current schedule
+         */
+        public boolean deltaValidateMaximumScheduleCountConstraint(int course) {
+            return courseAssignmentCount[course] < courses.numberOfLecturesForCourse[course];
+        }
+
+        /**
+         * Checks that all constraints are satisfied if the given course is assigned to the given time slot.
+         * @return true if the assignment does not violate constraint, false otherwise.
+         */
+        public boolean deltaValidateAllConstraints(int day, int period, int course) {
+            boolean allConstraintsSatisfied;
+
+            allConstraintsSatisfied = deltaValidateMaximumScheduleCountConstraint(course);
+            allConstraintsSatisfied = allConstraintsSatisfied && deltaValidateUnavailabilityConstraint(day, period, course);
+            allConstraintsSatisfied = allConstraintsSatisfied && deltaValidateSameLecturerConstraint(day, period, course);
+            allConstraintsSatisfied = allConstraintsSatisfied && deltaValidateSameCurriculumConstraint(day, period, course);
+
+            return allConstraintsSatisfied;
+        }
     }
 }
