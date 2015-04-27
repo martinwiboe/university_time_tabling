@@ -1,6 +1,10 @@
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
+
+import com.opencsv.CSVWriter;
 
 public abstract class Heuristic {
     public static final int EMPTY_ROOM = -1;
@@ -11,8 +15,9 @@ public abstract class Heuristic {
      * This method is abstract and must be implemented according to the chosen heuristic.
      * @param schedule The Schedule to start from
      * @return The most optimal schedule found during search.
+     * @throws IOException 
      */
-    public abstract Schedule search(Schedule schedule);
+    public abstract Schedule search(Schedule schedule) throws IOException;
 
     private int timeout = 300;
 
@@ -445,10 +450,9 @@ public abstract class Heuristic {
 
         // Revert the change and return the computed value
         removeCourse(schedule, day, period, room);
-
+		
         return currentValue + delta;
     }
-
     /**
      * Gets the value of the solution if the given time slot and room is emptied
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
@@ -459,17 +463,15 @@ public abstract class Heuristic {
         if (currentCourse == Heuristic.EMPTY_ROOM) {
             return Integer.MAX_VALUE;
         }
-
         // Empty the room
         removeCourse(schedule, day, period, room);
-
+	
         // Validate constraints
         if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
             // Proposed solution is invalid. Revert the change and return a large value.
             assignCourse(schedule, day, period, room, currentCourse);
             return Integer.MAX_VALUE;
         }
-
         // Revert the change and return the computed value
         assignCourse(schedule, day, period, room, currentCourse);
 
@@ -628,6 +630,8 @@ public abstract class Heuristic {
     }
 
     protected enum Type { REMOVE, ASSIGN, SWAP, NOTHING }
+    protected CSVWriter writer = null;
+    protected Writer f;
 
     protected DeltaEvaluationState deltaState = new DeltaEvaluationState();
 

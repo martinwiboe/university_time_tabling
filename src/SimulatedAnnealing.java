@@ -1,14 +1,19 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 
+import com.opencsv.CSVWriter;
 
 
 public class SimulatedAnnealing extends Heuristic{
 
 	protected Schedule schedule; //current schedule 
 	protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
-	protected int IterationCount = 0;
 	protected int currentValue;
+	protected int previousValue = Integer.MAX_VALUE;
     private double temperature;
     private double tempchange;
     private int deltaval;
@@ -21,27 +26,33 @@ public class SimulatedAnnealing extends Heuristic{
     private int bestCourse1;
     private int bestCourse2;
     private Random Rand = new XORShiftRandom();
-   
     
     
-	public SimulatedAnnealing(double temperature,double tempchange) {
+	public SimulatedAnnealing(double temperature,double tempchange) throws IOException {
 		super();
 		this.temperature = temperature;
 		this.tempchange = tempchange;
+		// write iteration value to a CSV file
+		String uuid = UUID.randomUUID().toString();
+	     f = new FileWriter(this.getClass()+Float.toString((float) temperature)+Float.toString((float) tempchange)+uuid+"iterationValue.csv");
+	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 	}
 
 
 	@Override
-	public Schedule search(Schedule schedule) {
+	public Schedule search(Schedule schedule) throws IOException {
 		
+	    
 		System.out.println("Start");
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
         deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
+        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	    writer.writeNext(result);
 	    while(!timeoutReached()) {
-	    	this.IterationCount++; //Adds to the iteration count
-	    	if(IterationCount % 100000 == 0)
-	    	System.out.println("Iteation count = " + IterationCount);
+	    	this.iterationCount++; //Adds to the iteration count
+	    	if(iterationCount % 100000 == 0)
+	    	System.out.println("Iteation count = " + iterationCount);
 	    	day1  = day2 = period1 = period2 = room1 = room2 = 0;
 	    	boolean hardConstraintViolation = true;
 	    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
@@ -134,16 +145,28 @@ public class SimulatedAnnealing extends Heuristic{
 				break;
 			}
 	    	
-	    		temperature= temperature*tempchange; //Reduces the temperature
-	    
+	    	// TODO write results to a CSV file
+       
+	    		 temperature= temperature*tempchange; //Reduces the temperature
+	    		 if((float)Math.abs(previousValue-currentValue)/currentValue >= 0.05 ) {
+	    			 result = new String[] { "" + iterationCount, currentValue + "" };
+		    	     writer.writeNext(result);
+		    	     previousValue = currentValue;
+	    		 }
+	    		 
 	    	
 	}
+	    
+	    result = new String[] { "" + iterationCount, currentValue + "" };
+	    writer.writeNext(result);
+	    writer.flush();
+        f.close();
 		return schedule;
 	}
 	
     private double GetProbability()
     {
-        return Math.exp(deltaval/temperature);
+        return Math.exp(-deltaval/temperature);
     }
 
 }
