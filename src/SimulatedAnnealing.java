@@ -31,7 +31,7 @@ public class SimulatedAnnealing extends Heuristic{
 		this.temperature = temperature;
 		this.tempchange = tempchange;
 		// write iteration value to a CSV file
-	     f = new FileWriter(this.getClass()+"iterationValue.csv");
+	     f = new FileWriter(this.getClass()+Float.toString((float) temperature)+Float.toString((float) tempchange)+"iterationValue.csv");
 	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 	}
 

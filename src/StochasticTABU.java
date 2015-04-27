@@ -29,7 +29,7 @@ public class StochasticTABU extends Heuristic {
 		this.tabooLength = TabooLength;
 		tabooList1  = new Vector<Integer>();
 		tabooList2  = new Vector<Integer>();
-		 f = new FileWriter(this.getClass()+"iterationValue.csv");
+		 f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+"iterationValue.csv");
 	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 
 	}
