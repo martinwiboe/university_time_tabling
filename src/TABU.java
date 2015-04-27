@@ -1,5 +1,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Vector;
 
 import com.opencsv.CSVWriter;
@@ -12,19 +13,18 @@ import com.opencsv.CSVWriter;
  
 	protected Schedule schedule; //current schedule 
 	protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
-	protected int IterationCount = 0;
 	protected int currentValue;
 	private int tabooLength;
-	private int bestCourse1;
-	private int bestCourse2;
-    protected Vector<Integer> tabooList1; //The first taboolist - ONLY TABOOSEARCH
-    protected Vector<Integer> tabooList2; //The second taboolist - ONLY TABOOSEARCH
+	private Integer[] bestdayPeriodRoom1;
+	private Integer [] bestdayPeriodRoom2;
+    protected Vector<Integer[]> tabooList1; //The first taboolist - ONLY TABOOSEARCH
+    protected Vector<Integer[]> tabooList2; //The second taboolist - ONLY TABOOSEARCH
 	public TABU(int TabooLength) throws IOException
     {
 		super();
         this.tabooLength = TabooLength;
-        tabooList1  = new Vector<Integer>();
-        tabooList2  = new Vector<Integer>();
+        tabooList1  = new Vector<Integer[]>();
+        tabooList2  = new Vector<Integer[]>();
         f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+"iterationValue.csv");
 	    writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
         
@@ -38,8 +38,7 @@ import com.opencsv.CSVWriter;
  	    System.out.println("Start");
 		while(timeoutReached() == false) {
 			
-			this.IterationCount++; //Adds to the iteration count
-			System.out.println("Iteration Count = " + IterationCount);
+			this.iterationCount++; //Adds to the iteration count
 			for(int day=0;day<this.basicInfo.days;day++) { //run thorough all the days
  
  				for(int period =  0;period<this.basicInfo.periodsPerDay;period++) { //all the periods
@@ -56,10 +55,22 @@ import com.opencsv.CSVWriter;
  									int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
  									//TODO:also check the values if with emoving and adding methods
  									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, period,room, day2, period2, room2);
- 									if(currentValue>valueIfThisCoursesAreSwapped && IsTaboo(schedule.assignments[day][period][room], schedule.assignments[day2][period2][room2]) == false) {
+ 									if(currentValue>valueIfThisCoursesAreSwapped && IsTaboo(day,period,room, day2,period2,room2) == false) {
  										currentValue = valueIfThisCoursesAreSwapped;
- 										bestCourse1 = schedule.assignments[day][period][room];//Remembers the person for the taboolist
- 										bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
+ 										
+ 										
+ 										bestdayPeriodRoom1 = new Integer[3];
+ 										bestdayPeriodRoom1[0] = day;
+ 										bestdayPeriodRoom1[1] = period;
+ 										bestdayPeriodRoom1[2] = room;
+ 										bestdayPeriodRoom2 = new Integer[3];
+ 										bestdayPeriodRoom2[0] = day2;
+ 										bestdayPeriodRoom2[1] = period2;
+ 										bestdayPeriodRoom2[2] = room2;
+ 										
+ 										
+ 										int bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for the assign
+ 										int bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the course for the assign
  										removeCourse(schedule, day2, period2, room2);
  										removeCourse(schedule, day, period, room);
  										assignCourse(schedule, day2, period2, room2, bestCourse1);
@@ -75,7 +86,7 @@ import com.opencsv.CSVWriter;
  				}
  
  			}
-			AddTaboo(bestCourse1, bestCourse2); //Makes the swap back taboo.
+			AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //Makes the swap back taboo.
 	        String[] result = new String[] { "" + iterationCount, currentValue + "" };
 	       	writer.writeNext(result);
 	        }
@@ -91,7 +102,7 @@ import com.opencsv.CSVWriter;
      * @param course1
      * @param course2
      */
-    public void AddTaboo(int course1, int course2)
+    public void AddTaboo(Integer[] dayPeriodRoom1,Integer[] dayPeriodRoom2)
     {
         //If the list is full, the first added is now removed
         if(this.tabooList1.size() == this.tabooLength)
@@ -99,8 +110,8 @@ import com.opencsv.CSVWriter;
             this.tabooList1.remove(0);
             this.tabooList2.remove(0);
         }
-        this.tabooList1.add(course1);
-        this.tabooList2.add(course2);
+        this.tabooList1.add(dayPeriodRoom1);
+        this.tabooList2.add(dayPeriodRoom2);
     }
     
     /**
@@ -109,20 +120,20 @@ import com.opencsv.CSVWriter;
      * @param course2
      * @return
      */
-    public boolean IsTaboo(int course1, int course2)
+    public boolean IsTaboo(int day1,int period1, int room1,int day2,int period2,int room2)
     {
         for (int i = 0 ; i < this.tabooList1.size(); i++)
         {
-            if(tabooList1.elementAt(i) == course1)  
+            if(tabooList1.elementAt(i)[0] == day1 && tabooList1.elementAt(i)[1] == period1 && tabooList1.elementAt(i)[2] == room1 )  
             {
-                if(tabooList2.elementAt(i) == course2)
+                if(tabooList2.elementAt(i)[0] == day2 && tabooList2.elementAt(i)[1] == period2 && tabooList2.elementAt(i)[2] == room2)
                 {
                     return true;
                 }
             }
-            if(tabooList1.elementAt(i) == course2)
+            if(tabooList1.elementAt(i)[0] == day2 && tabooList1.elementAt(i)[1] == period2 && tabooList1.elementAt(i)[2] == room2 )  
             {
-                if(tabooList2.elementAt(i) == course1)
+                if(tabooList2.elementAt(i)[0] == day1 && tabooList2.elementAt(i)[1] == period1 && tabooList2.elementAt(i)[2] == room1)
                 {
                     return true;
                 }

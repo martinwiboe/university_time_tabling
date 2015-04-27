@@ -76,7 +76,7 @@ public class UniversityTimeTabling {
         String unavailabilityFile = args[6];
 
         // Create the heuristic
-        Heuristic heuristic = new StochasticTABU(20);
+        Heuristic heuristic = new SimulatedAnnealing(20.0, 0.95);
         heuristic.setTimeout(timeout);
         print("Using heuristic " + heuristic.getClass().getSimpleName());
         print("Running for " + timeout + " seconds");

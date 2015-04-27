@@ -158,7 +158,7 @@ public class SimulatedAnnealing extends Heuristic{
 	
     private double GetProbability()
     {
-        return Math.exp(deltaval/temperature);
+        return Math.exp(-deltaval/temperature);
     }
 
 }
