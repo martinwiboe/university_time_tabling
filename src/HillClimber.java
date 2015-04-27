@@ -49,7 +49,7 @@ public class HillClimber extends Heuristic {
                             int unScheduledCourseNo = entry.getKey();
                             int unScheduledCourseValue = entry.getValue();
                             if (schedule.assignments[day][period][room] == Heuristic.EMPTY_ROOM) {// room is empty
-                                int valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, day, room, period, unScheduledCourseNo);
+                                int valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, currentValue, day, room, period, unScheduledCourseNo);
                                 if (valueIfThisCourseIsAssigned <= currentValue) {
                                     assignCourse(schedule, day, period, room, unScheduledCourseNo);
                                     unScheduledCourseValue--;
@@ -73,9 +73,9 @@ public class HillClimber extends Heuristic {
                     day2 = Rand.nextInt(this.basicInfo.days);
                     room2 = Rand.nextInt(this.basicInfo.rooms);
                     period2 = Rand.nextInt(this.basicInfo.periodsPerDay);
-                    valueIfThisCourseIsRemoved = valueIfRemovingCourse(schedule, day, room, period);
+                    valueIfThisCourseIsRemoved = valueIfRemovingCourse(schedule, currentValue, day, room, period);
                     int courseId = Rand.nextInt(this.basicInfo.courses);
-                    valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, day, room, period, courseId);
+                    valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseId);
                     valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, period, room, day2, period2, room2);
                     Type change;
                     if (valueIfThisCourseIsRemoved <= valueIfThisCourseIsAssigned) {

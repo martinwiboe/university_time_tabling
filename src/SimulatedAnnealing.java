@@ -56,9 +56,9 @@ public class SimulatedAnnealing extends Heuristic{
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room2  = Rand.nextInt(this.basicInfo.rooms);
 	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);	
-	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day1, room1, period1);
+	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day1, room1, period1);
 	    		courseId = Rand.nextInt(this.basicInfo.courses);
-	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day1, room1, period1, courseId);
+	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day1, room1, period1, courseId);
 	    		if(!(valueIfThisCoursesAreSwapped == Integer.MAX_VALUE && valueIfThisCourseIsRemoved == Integer.MAX_VALUE && valueIfThisCourseIsAssigned == Integer.MAX_VALUE))
 	    			hardConstraintViolation =  false;
 	

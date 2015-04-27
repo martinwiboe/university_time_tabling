@@ -1,11 +1,7 @@
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
-/**
- * Created by Martin on 05-04-2015.
- */
 public abstract class Heuristic {
     public static final int EMPTY_ROOM = -1;
 
@@ -129,10 +125,7 @@ public abstract class Heuristic {
      */
     public boolean validateAvailabilityConstraint(Schedule schedule) {
         // Iterate through all constraints and check whether any have been violated
-        Iterator<UnavailabilityConstraint> iter = unavailability.constraints.iterator();
-        while (iter.hasNext()) {
-            UnavailabilityConstraint c = iter.next();
-
+        for (UnavailabilityConstraint c : unavailability.constraints) {
             for (int room = 0; room < basicInfo.rooms; room++) {
                 if (schedule.assignments[c.day][c.period][room] == c.course)
                     return false;
@@ -164,7 +157,7 @@ public abstract class Heuristic {
      * Validates that no course has been scheduled more than the minimum number of times.
      * @return true if the constraint is not violated by the current schedule
      */
-	public boolean validateMaximumScheduleCountConstraint(Schedule schedule) {
+	public boolean validateMaximumScheduleCountConstraint() {
         for (int course = 0; course < basicInfo.courses; course++) {
             if (deltaState.courseAssignmentCount[course] > courses.numberOfLecturesForCourse[course])
                 return false;
@@ -251,10 +244,8 @@ public abstract class Heuristic {
     public int evaluationFunction(Schedule schedule)
     {
     	int[] numberOfLecturesOfCourse = new int[basicInfo.courses];
-    	
-    	for(int i=0; i < basicInfo.courses; i++){
-    		numberOfLecturesOfCourse[i] = courses.numberOfLecturesForCourse[i];
-    	}
+
+        System.arraycopy(courses.numberOfLecturesForCourse, 0, numberOfLecturesOfCourse, 0, basicInfo.courses);
     	
     	//to calculate the number of unallocated lectures of each course
     	for(int day= 0; day < basicInfo.days; day++){
@@ -270,10 +261,8 @@ public abstract class Heuristic {
     	
     	//to calculate the number of days of each course that is scheduled below the minimum number of working days
     	int[] minimumWorkingDaysOfCourse = new int[basicInfo.courses];
-    	
-    	for(int i=0; i < basicInfo.courses; i++){
-    		minimumWorkingDaysOfCourse[i] = courses.minimumWorkingDaysForCourse[i];
-    	}
+
+        System.arraycopy(courses.minimumWorkingDaysForCourse, 0, minimumWorkingDaysOfCourse, 0, basicInfo.courses);
     	
     	for(int day = 0; day < basicInfo.days; day++){
     		// to avoid overcount working days of each course
@@ -285,9 +274,9 @@ public abstract class Heuristic {
     		for(int period = 0; period < basicInfo.periodsPerDay; period++){
     			for(int room = 0; room < basicInfo.rooms; room++){
     				int assignedCourse = schedule.assignments[day][period][room];
-    				if(assignedCourse == -1)
+    				if(assignedCourse == EMPTY_ROOM)
     					continue;
-    				if(dayFulfilled[assignedCourse] == true)
+    				if(dayFulfilled[assignedCourse])
     					continue;
     				dayFulfilled[assignedCourse] = true;
     				minimumWorkingDaysOfCourse[assignedCourse]--;
@@ -313,7 +302,7 @@ public abstract class Heuristic {
     				int count1 = 0; // to calculate X_c,t,r
     				int count2 = 0; // to calculate X_c',t',r'
     				for(int course = 0; course < basicInfo.courses; course++){
-    					if (this.curriculum.isCourseInCurriculum[course][curriculum] == true){
+    					if (this.curriculum.isCourseInCurriculum[course][curriculum]){
     						for(int room = 0; room < basicInfo.rooms; room++){
     	    					if(schedule.assignments[day][period][room] == course)
     	    						count1++;
@@ -325,7 +314,7 @@ public abstract class Heuristic {
     				
     				if(adjacentPeriod1 >= 0){
     					for(int course = 0;course < basicInfo.courses; course++){
-    						if(this.curriculum.isCourseInCurriculum[course][curriculum] == true){
+    						if(this.curriculum.isCourseInCurriculum[course][curriculum]){
     							for(int room = 0; room < basicInfo.rooms;room++){
     								if(schedule.assignments[day][adjacentPeriod1][room] == course)
     									count2++;
@@ -336,7 +325,7 @@ public abstract class Heuristic {
     				
     				if(adjacentPeriod2 < basicInfo.periodsPerDay){
     					for(int course = 0;course < basicInfo.courses; course++){
-    						if(this.curriculum.isCourseInCurriculum[course][curriculum] == true){
+    						if(this.curriculum.isCourseInCurriculum[course][curriculum]){
     							for(int room = 0; room < basicInfo.rooms;room++){
     								if(schedule.assignments[day][adjacentPeriod2][room] == course)
     									count2++;	
@@ -377,7 +366,7 @@ public abstract class Heuristic {
     		}
     		
     		for(int room = 0; room < basicInfo.rooms; room++){
-        		if(roomChanged[room] == true)
+        		if(roomChanged[room])
         			numberOfRoomChanges[course]++;
         	}
     	}
@@ -398,7 +387,7 @@ public abstract class Heuristic {
     		}
     	}
     	
-    	int objective = 0; // calculate the penalties 
+    	int objective; // calculate the penalties
     	int unscheduled = 0;
     	int minimumWorkingDays = 0;
     	int curriculumCompactness = 0;
@@ -436,42 +425,35 @@ public abstract class Heuristic {
      * This method return Integer.MAX_VALUE if the room is already occupied.
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated.
      */
-    protected int valueIfAssigningCourse(Schedule schedule, int day, int room, int period, int courseId) {
+    protected int valueIfAssigningCourse(Schedule schedule, int currentValue, int day, int room, int period, int courseId) {
         // Room must currently be empty
         if (schedule.assignments[day][period][room] != Heuristic.EMPTY_ROOM) {
             return Integer.MAX_VALUE;
         }
 
-        int currentValue = evaluationFunction(schedule);
         int delta = deltaState.getDeltaWhenAdding(day, period, room, courseId);
 
         // Assign the course
         assignCourse(schedule, day, period, room, courseId);
 
         // Validate all constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint(schedule)) {
+        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
             // Revert the change and return a large value
             removeCourse(schedule, day, period, room);
             return Integer.MAX_VALUE;
         }
 
-        // Compute the value of the altered solution
-        int value = evaluationFunction(schedule);
-
         // Revert the change and return the computed value
         removeCourse(schedule, day, period, room);
 
-        int con = value - currentValue;
-        assert con == delta;
-
-        return value;
+        return currentValue + delta;
     }
 
     /**
      * Gets the value of the solution if the given time slot and room is emptied
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
      */
-    protected int valueIfRemovingCourse(Schedule schedule, int day, int room, int period) {
+    protected int valueIfRemovingCourse(Schedule schedule, int currentValue, int day, int room, int period) {
         // Room must currently be occupied
         int currentCourse = schedule.assignments[day][period][room];
         if (currentCourse == Heuristic.EMPTY_ROOM) {
@@ -482,7 +464,73 @@ public abstract class Heuristic {
         removeCourse(schedule, day, period, room);
 
         // Validate constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint(schedule)) {
+        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
+            // Proposed solution is invalid. Revert the change and return a large value.
+            assignCourse(schedule, day, period, room, currentCourse);
+            return Integer.MAX_VALUE;
+        }
+
+        // Revert the change and return the computed value
+        assignCourse(schedule, day, period, room, currentCourse);
+
+        int delta = deltaState.getDeltaWhenRemoving(day, period, room, currentCourse);
+        return currentValue + delta;
+    }
+
+	/**
+	 * Gets the value of the solution if it is altered by assigning a specific course in a given time slot and room.
+	 * This method return Integer.MAX_VALUE if the room is already occupied.
+	 * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated.
+	 */
+	@Deprecated
+	protected int valueIfAssigningCourseOld(Schedule schedule, int day, int room, int period, int courseId) {
+		// Room must currently be empty
+		if (schedule.assignments[day][period][room] != Heuristic.EMPTY_ROOM) {
+			return Integer.MAX_VALUE;
+		}
+
+		int currentValue = evaluationFunction(schedule);
+		int delta = deltaState.getDeltaWhenAdding(day, period, room, courseId);
+
+		// Assign the course
+		assignCourse(schedule, day, period, room, courseId);
+
+		// Validate all constraints
+		if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
+			// Revert the change and return a large value
+			removeCourse(schedule, day, period, room);
+			return Integer.MAX_VALUE;
+		}
+
+		// Compute the value of the altered solution
+		int value = evaluationFunction(schedule);
+
+		// Revert the change and return the computed value
+		removeCourse(schedule, day, period, room);
+
+		int con = value - currentValue;
+		assert con == delta;
+
+		return value;
+	}
+
+    /**
+     * Gets the value of the solution if the given time slot and room is emptied
+     * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
+     */
+    @Deprecated
+    protected int valueIfRemovingCourseOld(Schedule schedule, int day, int room, int period) {
+        // Room must currently be occupied
+        int currentCourse = schedule.assignments[day][period][room];
+        if (currentCourse == Heuristic.EMPTY_ROOM) {
+            return Integer.MAX_VALUE;
+        }
+
+        // Empty the room
+        removeCourse(schedule, day, period, room);
+
+        // Validate constraints
+        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
             // Proposed solution is invalid. Revert the change and return a large value.
             assignCourse(schedule, day, period, room, currentCourse);
             return Integer.MAX_VALUE;
@@ -493,6 +541,7 @@ public abstract class Heuristic {
 
         // Revert the change and return the computed value
         assignCourse(schedule, day, period, room, currentCourse);
+
         return value;
     }
 
@@ -513,7 +562,7 @@ public abstract class Heuristic {
         assignCourse(schedule, day, period, room, currentCourse2);
 
         // Validate constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint(schedule)) {
+        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
             // Proposed solution is invalid. Revert the change and return a large value.
         	removeCourse(schedule, day, period, room);
             removeCourse(schedule, day2, period2, room2);
@@ -572,13 +621,7 @@ public abstract class Heuristic {
         }
     }
 
-    private void print(String message) {
-        System.out.println(message);
-    }
-    
     protected enum Type { REMOVE, ASSIGN, SWAP, NOTHING }
-
-    protected Schedule schedule;
 
     protected DeltaEvaluationState deltaState = new DeltaEvaluationState();
 
@@ -721,12 +764,12 @@ public abstract class Heuristic {
             int minimumWorkingDays = courses.minimumWorkingDaysForCourse[course];
             int currentWorkingDays = courseWorkingDays[course];
 
-            // If we are already at a sufficient number of working days, adding one does not reduce solution value
-            if (minimumWorkingDays <= currentWorkingDays)
+            // If we are already at a sufficient number of working days, removing one does not increase solution value
+            if (minimumWorkingDays < currentWorkingDays)
                 return 0;
 
-            // Decreasing the working days deficit will reduce the penalty
-            return -MINIMUM_WORKING_DAYS_PENALTY;
+            // Increasing the working days deficit will increase the penalty
+            return MINIMUM_WORKING_DAYS_PENALTY;
         }
 
         public int roomStabilityPenaltyAfterAdding(int room, int course) {
@@ -770,7 +813,7 @@ public abstract class Heuristic {
 
                         earlierNeighorIsSecluded = period < 2 || curriculumAssigned[curriculum][day][period - 2] == 0;
                     }
-                    hasNeighbor = hasNeighbor || hasNeighborEarlier;
+                    hasNeighbor = hasNeighborEarlier;
                 }
 
                 if (period + 1 < basicInfo.periodsPerDay) {
@@ -797,34 +840,93 @@ public abstract class Heuristic {
             return ownSeclusionPenalty + otherSeclusionPenalty;
         }
 
+        public int curriculumCompactnessPenaltyAfterRemoving(int day, int period, int course) {
+            LinkedList<Integer> curriculaForCourse = curriculum.curriculaForCourse.get(course);
+
+            int ownSeclusionPenalty = 0;
+            int otherSeclusionPenalty = 0;
+
+            for (int curriculum : curriculaForCourse) {
+                // Determine whether the added course is secluded with respect to this curriculum
+                boolean hasNeighbor = false;
+                boolean earlierNeighorIsSecluded = false;
+                boolean hasNeighborEarlier = false;
+                boolean hasNeighborLater = false;
+                boolean laterNeighborIsSecluded = false;
+                if (period > 0) {
+                    hasNeighborEarlier = curriculumAssigned[curriculum][day][period - 1] > 0;
+
+                    if (hasNeighborEarlier) {
+                        // We have an earlier neighbor -- compute whether that neighbor already had a neighbor
+
+                        earlierNeighorIsSecluded = period < 2 || curriculumAssigned[curriculum][day][period - 2] == 0;
+                    }
+                    hasNeighbor = hasNeighborEarlier;
+                }
+
+                if (period + 1 < basicInfo.periodsPerDay) {
+                    hasNeighborLater = curriculumAssigned[curriculum][day][period + 1] > 0;
+
+                    if (hasNeighborLater) {
+                        // We have a later neighbor -- compute whether that neighbor was already secluded
+                        laterNeighborIsSecluded = period > basicInfo.periodsPerDay - 3 || curriculumAssigned[curriculum][day][period + 2] == 0;
+                    }
+
+                    hasNeighbor = hasNeighbor || hasNeighborLater;
+                }
+
+                if (!hasNeighbor)
+                    ownSeclusionPenalty -= CURRICULUM_COMPACTNESS_PENALTY;
+
+                if (hasNeighborEarlier && earlierNeighorIsSecluded)
+                    otherSeclusionPenalty += CURRICULUM_COMPACTNESS_PENALTY;
+
+                if (hasNeighborLater && laterNeighborIsSecluded)
+                    otherSeclusionPenalty += CURRICULUM_COMPACTNESS_PENALTY;
+            }
+
+            return ownSeclusionPenalty + otherSeclusionPenalty;
+        }
+
         public int getDeltaWhenAdding(int day, int period, int room, int course) {
             int penaltyDelta = 0;
 
-            int unscheduled, minimumWorkingDays, curriculumCompactness, roomStability, leftOverCapacity;
-
             // Unscheduled
-            penaltyDelta += (unscheduled = getUnscheduledPenaltyAfterAdding(course));
+            penaltyDelta += getUnscheduledPenaltyAfterAdding(course);
 
             // RoomCapacity
-            penaltyDelta += (leftOverCapacity = roomCapacityPenaltyAfterAdding(room, course));
+            penaltyDelta += roomCapacityPenaltyAfterAdding(room, course);
 
             // MinimumWorkingDays
-            penaltyDelta += (minimumWorkingDays = minWorkingDaysPenaltyAfterAdding(day, course));
+            penaltyDelta += minWorkingDaysPenaltyAfterAdding(day, course);
 
             // CurriculumCompactness
-            penaltyDelta += (curriculumCompactness = curriculumCompactnessPenaltyAfterAdding(day, period, course));
+            penaltyDelta += curriculumCompactnessPenaltyAfterAdding(day, period, course);
 
             // RoomStability
-            penaltyDelta += (roomStability = roomStabilityPenaltyAfterAdding(room, course));
+            penaltyDelta += roomStabilityPenaltyAfterAdding(room, course);
 
-            /*
-            System.out.format("delta: unscheduled %d minwork %d compact %d roomstability %d, roomcapa %d \n",
-                    unscheduled / UNSCHEDULED_PENALTY,
-                    minimumWorkingDays / MINIMUM_WORKING_DAYS_PENALTY,
-                    curriculumCompactness / CURRICULUM_COMPACTNESS_PENALTY,
-                    roomStability,
-                    leftOverCapacity / ROOM_CAPACITY_PENALTY);
-            */
+            return penaltyDelta;
+        }
+
+
+        public int getDeltaWhenRemoving(int day, int period, int room, int course) {
+            int penaltyDelta = 0;
+
+            // Unscheduled
+            penaltyDelta += getUnscheduledPenaltyAfterRemoving(course);
+
+            // RoomCapacity
+            penaltyDelta += roomCapacityPenaltyAfterRemoving(room, course);
+
+            // MinimumWorkingDays
+            penaltyDelta += minWorkingDaysPenaltyAfterRemoving(day, course);
+
+            // CurriculumCompactness
+            penaltyDelta += curriculumCompactnessPenaltyAfterRemoving(day, period, course);
+
+            // RoomStability
+            penaltyDelta += roomStabilityPenaltyAfterRemoving(room, course);
 
             return penaltyDelta;
         }
