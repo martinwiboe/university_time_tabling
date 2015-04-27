@@ -278,16 +278,9 @@ public class StochasticTABU extends Heuristic {
 				}				
 			}
 		}
-<<<<<<< HEAD
 		else if (dayPeriodRoom2[0] == ASSIGNNO) {
 			for (int i = 0 ; i < this.tabooList1.size(); i++)
-=======
 
-		for (int i = 0 ; i < this.tabooList1.size(); i++)
-		{
-			
-			if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
->>>>>>> delta-evaluation
 			{
 				
 				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
