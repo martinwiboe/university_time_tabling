@@ -437,46 +437,6 @@ public abstract class Heuristic {
     	return objective;
     }
     
-	 	//[day][period][room]
- 	protected void DeepClone(Schedule original,Schedule copy) {
- 		for(int day=0;day<original.assignments.length;day++) {
- 			for(int period =  0;period<original.assignments[day].length;period++) {
- 				for(int room = 0;room<original.assignments[day][period].length;room++) {
- 					//System.out.println("day = " + day + " period = "+period + " room = "+room);
- 					copy.assignments[day][period][room] = original.assignments[day][period][room];
- 				}
- 			}
- 		}
-		
-	}
- 	
- 	protected void SwapCourse (int day1,int period1 ,int room1,int day2,int period2 ,int room2 , Schedule Content ) {
- 		
- 		int temp = Content.assignments[day1][period1][room1]; 
- 		Content.assignments[day1][period1][room1] = Content.assignments[day2][period2][room2];
- 		Content.assignments[day2][period2][room2] = temp;
- 	}
-
- 	//delete and return the course number given schedule and time slots
-protected int RemoveCourse (int day,int period ,int room, Schedule Content ) { 
-		
- 		if(Content.assignments[day][period][room]==-1) //there is no course in given time-room slot
- 			return -1;
- 		int tmp = Content.assignments[day][period][room];
- 		Content.assignments[day][period][room]= -1;
-		return tmp;
- 	}
-
-
-protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule Content ) {
-	
-		if(Content.assignments[day][period][room]!=-1) //first empty the time-room slot
-			return false;
-		Content.assignments[day][period][room] = courseNo;
-		return true;
-	}
-
-
     /**
      * Gets the value of the solution if it is altered by assigning a specific course in a given time slot and room.
      * This method return Integer.MAX_VALUE if the room is already occupied.
