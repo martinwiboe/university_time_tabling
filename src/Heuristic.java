@@ -556,6 +556,9 @@ public abstract class Heuristic {
         int currentCourse = schedule.assignments[day][period][room];
         int currentCourse2 = schedule.assignments[day2][period2][room2];
 
+        if (currentCourse == EMPTY_ROOM || currentCourse2 == EMPTY_ROOM)
+            return Integer.MAX_VALUE;
+
         int totalDelta = 0;
 
         // Swap the rooms
