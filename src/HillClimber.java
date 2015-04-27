@@ -1,8 +1,11 @@
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import org.omg.PortableInterceptor.CurrentOperations;
+
+import com.opencsv.CSVWriter;
 
 
 
@@ -17,6 +20,10 @@ public class HillClimber extends Heuristic {
 	protected int currentValue;
 	private Random Rand = new XORShiftRandom();
 	private Map<Integer,Integer> unScheduledCourses;
+	private CSVWriter writer = null;
+    private Writer f;
+    private CSVWriter wr;
+    
 	@Override
 	public Schedule search(Schedule schedule) {
 		startCountdown();

@@ -47,6 +47,7 @@ public class SimulatedAnnealing extends Heuristic{
 		System.out.println("Start");
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
+        System.out.println(currentValue);
         courseAssignmentCount = getCourseAssignmentCount(schedule);
 	    while(!timeoutReached()) {
 	    	this.iterationCount++; //Adds to the iteration count
@@ -147,8 +148,10 @@ public class SimulatedAnnealing extends Heuristic{
 	    	// TODO write results to a CSV file
        
 	    		temperature= temperature*tempchange; //Reduces the temperature
+	    		if(iterationCount%10000 == 0){
 	    		 String[] result = new String[] { "" + iterationCount, currentValue + "" };
 	    	     writer.writeNext(result);
+	    		}
 	    	
 	}
 	   
