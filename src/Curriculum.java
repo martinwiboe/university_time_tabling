@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +12,11 @@ public class Curriculum {
      * Look up whether there is a relation between [course][curriculum]
      */
     boolean isCourseInCurriculum[][];
+
+    /**
+     * Contains a list of curricula for each course.
+     */
+    ArrayList<LinkedList<Integer>> curriculaForCourse;
 
     public void loadFromFile(String curriculaFile, String relationFile, int numberOfCourses) {
         // Load the list of curricula
@@ -35,6 +42,10 @@ public class Curriculum {
             bufferedReader.close();
             reader.close();
 
+            curriculaForCourse = new ArrayList<LinkedList<Integer>>(numberOfCourses);
+            for (int i = 0; i < numberOfCourses; i++)
+                curriculaForCourse.add(new LinkedList<Integer>());
+
             // Store assignments as an array of booleans
             isCourseInCurriculum = new boolean[numberOfCourses][curriculaCount];
 
@@ -52,6 +63,7 @@ public class Curriculum {
                 int curriculumId = Integer.parseInt(m.group(1));
                 int courseId = Integer.parseInt(m.group(2));
                 isCourseInCurriculum[courseId][curriculumId] = true;
+                curriculaForCourse.get(courseId).add(curriculumId);
             }
         } catch (IOException e) {
             e.printStackTrace();
