@@ -1,5 +1,8 @@
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
+
+import com.opencsv.CSVWriter;
 
 
 /**
@@ -9,15 +12,21 @@ import java.util.Vector;
  
 	protected Schedule schedule; //current schedule 
 	protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
-	protected int IterationCount = 0;
 	protected int currentValue;
 	protected int bestValue  = Integer.MAX_VALUE;
 	private int bestCourse1;
 	private int bestCourse2;
     
 	
+	public HillClimberOld() throws IOException {
+		super();
+		 f = new FileWriter(this.getClass()+"iterationValue.csv");
+	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
+	}
+
+
 	@Override
-	public Schedule search(Schedule schedule) {
+	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
         courseAssignmentCount = getCourseAssignmentCount(schedule);
@@ -26,8 +35,7 @@ import java.util.Vector;
 		while(timeoutReached() == false) {
 			//done = true;
 			bestValue = currentValue;
-			this.IterationCount++; //Adds to the iteration count
-			System.out.println("Iteration Count = " + IterationCount);
+			this.iterationCount++; //Adds to the iteration count
 			for(int day=0;day<this.basicInfo.days;day++) { //run thorough all the days
  
  				for(int period =  0;period<this.basicInfo.periodsPerDay;period++) { //all the periods
@@ -71,7 +79,13 @@ import java.util.Vector;
 			
 			
  			
- 		}
+			
+	           	 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	       	     writer.writeNext(result);
+	            
+	        }
+	        writer.flush();
+	        f.close();
  		System.out.println("HillClimber Old  Found A Solution!");
  		System.out.println("Value  = "+evaluationFunction(schedule));
  		return schedule;

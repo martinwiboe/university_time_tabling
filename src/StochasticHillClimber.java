@@ -1,4 +1,8 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
+
+import com.opencsv.CSVWriter;
 
 /**
  * Created by Burak on 08-04-2015.
@@ -9,9 +13,15 @@ public class StochasticHillClimber extends Heuristic {
     protected int currentValue;
 
     private Random random = new XORShiftRandom();
+    
+    public  StochasticHillClimber() throws IOException {
+		super();
+		 f = new FileWriter(this.getClass()+"iterationValue.csv");
+	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
+	}
 
 	@Override
-	public Schedule search(Schedule schedule) {
+	public Schedule search(Schedule schedule) throws IOException {
         startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
         courseAssignmentCount = getCourseAssignmentCount(schedule);
@@ -49,8 +59,13 @@ public class StochasticHillClimber extends Heuristic {
                     currentValue = valueIfThisCourseIsRemoved;
                 }
             }
+            if(iterationCount%10000 == 0){
+           	 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+       	     writer.writeNext(result);
+            }
         }
-
+        writer.flush();
+        f.close();
         return schedule;
     }
 }

@@ -1,8 +1,11 @@
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
+
+import com.opencsv.CSVWriter;
 
 /**
  * Created by Martin on 05-04-2015.
@@ -459,25 +462,6 @@ public abstract class Heuristic {
  		Content.assignments[day2][period2][room2] = temp;
  	}
 
- 	//delete and return the course number given schedule and time slots
-protected int RemoveCourse (int day,int period ,int room, Schedule Content ) { 
-		
- 		if(Content.assignments[day][period][room]==-1) //there is no course in given time-room slot
- 			return -1;
- 		int tmp = Content.assignments[day][period][room];
- 		Content.assignments[day][period][room]= -1;
-		return tmp;
- 	}
-
-
-protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule Content ) {
-	
-		if(Content.assignments[day][period][room]!=-1) //first empty the time-room slot
-			return false;
-		Content.assignments[day][period][room] = courseNo;
-		return true;
-	}
-
 
     /**
      * Gets the value of the solution if it is altered by assigning a specific course in a given time slot and room.
@@ -595,4 +579,6 @@ protected boolean AddCourse (int courseNo,int day,int period ,int room, Schedule
     }
     
     protected enum Type { REMOVE,ASSIGN,SWAP,NOTHING};
+    protected CSVWriter writer = null;
+    protected Writer f;
 }

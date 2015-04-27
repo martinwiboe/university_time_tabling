@@ -1,5 +1,8 @@
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
+
+import com.opencsv.CSVWriter;
 
 
 /**
@@ -18,14 +21,17 @@ import java.util.Vector;
     protected Vector<Integer> tabooList2; //The second taboolist - ONLY TABOOSEARCH
 	public TABU(int TabooLength) throws IOException
     {
+		super();
         this.tabooLength = TabooLength;
         tabooList1  = new Vector<Integer>();
         tabooList2  = new Vector<Integer>();
+        f = new FileWriter(this.getClass()+"iterationValue.csv");
+	    writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
         
     }
 	
 	@Override
-	public Schedule search(Schedule schedule) {
+	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
         courseAssignmentCount = getCourseAssignmentCount(schedule);
@@ -70,8 +76,11 @@ import java.util.Vector;
  
  			}
 			AddTaboo(bestCourse1, bestCourse2); //Makes the swap back taboo.
- 			
- 		}
+	        String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	       	writer.writeNext(result);
+	        }
+	    writer.flush();
+	    f.close();
  		System.out.println("Tabu  Found A Solution!");
  		System.out.println("Value  = "+evaluationFunction(schedule));
  		return schedule;
