@@ -46,9 +46,9 @@ public class SimulatedAnnealing extends Heuristic{
 		System.out.println("Start");
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
+        deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
         String[] result = new String[] { "" + iterationCount, currentValue + "" };
 	    writer.writeNext(result);
-        courseAssignmentCount = getCourseAssignmentCount(schedule);
 	    while(!timeoutReached()) {
 	    	this.iterationCount++; //Adds to the iteration count
 	    	if(iterationCount % 100000 == 0)
@@ -57,7 +57,7 @@ public class SimulatedAnnealing extends Heuristic{
 	    	boolean hardConstraintViolation = true;
 	    	int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 			int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
-			//int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
+			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
 			int courseId = -1;
 	    	while(((day1==day2)&&(period1==period2)&&(room1==room2) || hardConstraintViolation) ) {    		
 	    		day1 = Rand.nextInt(this.basicInfo.days);
@@ -66,10 +66,10 @@ public class SimulatedAnnealing extends Heuristic{
 	    		period2 = Rand.nextInt(this.basicInfo.periodsPerDay);
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room2  = Rand.nextInt(this.basicInfo.rooms);
-	    		//valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);	
-	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day1, room1, period1);
+	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, currentValue, day1, period1,room1,day2,period2,room2);
+	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day1, room1, period1);
 	    		courseId = Rand.nextInt(this.basicInfo.courses);
-	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day1, room1, period1, courseId);
+	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day1, room1, period1, courseId);
 	    		if(!( valueIfThisCourseIsRemoved == Integer.MAX_VALUE && valueIfThisCourseIsAssigned == Integer.MAX_VALUE))
 	    			hardConstraintViolation =  false;
 	

@@ -49,7 +49,7 @@ public class StochasticTABU extends Heuristic {
 		currentValue = evaluationFunction(schedule); // value of the current solution
 		String[] result = new String[] { "" + iterationCount, currentValue + "" };
 		writer.writeNext(result);
-		courseAssignmentCount = getCourseAssignmentCount(schedule);
+		deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
 		int rooms = this.basicInfo.rooms;
 		int days = this.basicInfo.days;
 		int periods = this.basicInfo.periodsPerDay;
@@ -66,10 +66,10 @@ public class StochasticTABU extends Heuristic {
 			int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 			int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
 			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
-			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, day, room, period); //calculate the value if we remove the course given timeslot
+			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day, room, period); //calculate the value if we remove the course given timeslot
 			int courseId = random.nextInt(this.basicInfo.courses);
-			valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, day, room, period, courseId); //calculate the value if we swap the courses given timeslots
-			valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
+			valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseId); //calculate the value if we swap the courses given timeslots
+			valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, currentValue, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
 			Type change;
 			//we have the new values now we need to choose which action would be the best according to new values
 			if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
@@ -261,9 +261,6 @@ public class StochasticTABU extends Heuristic {
 
 	/**
 	 * Finds out if the swap is tabooed - ONLY TABOO SEARCH
-	 * @param course1
-	 * @param course2
-	 * @return
 	 */
 	public boolean IsTaboo(Integer[] dayPeriodRoom1,Integer[] dayPeriodRoom2)
 	{
@@ -281,8 +278,16 @@ public class StochasticTABU extends Heuristic {
 				}				
 			}
 		}
+<<<<<<< HEAD
 		else if (dayPeriodRoom2[0] == ASSIGNNO) {
 			for (int i = 0 ; i < this.tabooList1.size(); i++)
+=======
+
+		for (int i = 0 ; i < this.tabooList1.size(); i++)
+		{
+			
+			if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
+>>>>>>> delta-evaluation
 			{
 				
 				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  

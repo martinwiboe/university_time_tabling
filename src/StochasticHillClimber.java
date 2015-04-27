@@ -10,7 +10,6 @@ import com.opencsv.CSVWriter;
  */
 public class StochasticHillClimber extends Heuristic {
 
-	public static final int EMPTY_ROOM = -1;
 	protected int currentValue;
 	protected int previousValue  = Integer.MAX_VALUE;
 
@@ -27,7 +26,7 @@ public class StochasticHillClimber extends Heuristic {
 	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
 		currentValue = evaluationFunction(schedule); // value of the current solution
-		courseAssignmentCount = getCourseAssignmentCount(schedule);
+        deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
 		String[] result = new String[] { "" + iterationCount, currentValue + "" };
 		writer.writeNext(result);
 		int rooms = this.basicInfo.rooms;
@@ -48,7 +47,7 @@ public class StochasticHillClimber extends Heuristic {
 				// Find a course to assign
 				int courseToAssign = random.nextInt(basicInfo.courses);
 
-				int valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, day, room, period, courseToAssign);
+                int valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseToAssign);
 
 				if (valueIfThisCourseIsAssigned < currentValue) {
 					assignCourse(schedule, day, period, room, courseToAssign);
@@ -56,7 +55,7 @@ public class StochasticHillClimber extends Heuristic {
 				}
 			} else {
 				// Maybe we should remove the assigned course?
-				int valueIfThisCourseIsRemoved = valueIfRemovingCourse(schedule, day, room, period);
+                int valueIfThisCourseIsRemoved = valueIfRemovingCourse(schedule, currentValue, day, room, period);
 
 				if (valueIfThisCourseIsRemoved < currentValue) {
 					removeCourse(schedule, day, period, room);

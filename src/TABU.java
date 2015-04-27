@@ -37,9 +37,9 @@ public class TABU extends Heuristic {
 	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
 		currentValue = evaluationFunction(schedule); // value of the current solution
+		deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
 		String[] result = new String[] { "" + iterationCount, currentValue + "" };
 		writer.writeNext(result);
-		courseAssignmentCount = getCourseAssignmentCount(schedule);
 		System.out.println("Start");
 		while(timeoutReached() == false) {
 
@@ -59,7 +59,7 @@ public class TABU extends Heuristic {
 									//int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
 									int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
 									//TODO:also check the values if with emoving and adding methods
-									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, period,room, day2, period2, room2);
+ 									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, currentValue, day, period,room, day2, period2, room2);
 									if(currentValue>valueIfThisCoursesAreSwapped && IsTaboo(day,period,room, day2,period2,room2) == false) {
 										currentValue = valueIfThisCoursesAreSwapped;
 

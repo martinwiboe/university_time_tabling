@@ -118,6 +118,7 @@ public class UniversityTimeTabling {
         Schedule initialSchedule = heuristic.getRandomInitialSolution();
         debug("Starting search...");
 
+        heuristic.deltaState.initialize(initialSchedule);
         Schedule solution = heuristic.search(initialSchedule);
 
         int objectiveValue;

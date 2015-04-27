@@ -6,9 +6,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Courses {
+    /**
+     * The lecturer teaching the course.
+     */
     public int[] lecturerForCourse;
+
+    /**
+     * The minimum number of lectures that should be scheduled for this course.
+     */
     public int[] numberOfLecturesForCourse;
+
+    /**
+     * The minimum number of distinct days that course lectures should be scheduled on.
+     */
     public int[] minimumWorkingDaysForCourse;
+
+    /**
+     * The number of students attending this course.
+     */
     public int[] numberOfStudentsForCourse;
 
 
