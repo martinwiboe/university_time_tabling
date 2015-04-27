@@ -28,7 +28,7 @@ import java.util.Vector;
 	public Schedule search(Schedule schedule) {
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
-        courseAssignmentCount = getCourseAssignmentCount(schedule);
+		deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
  	    System.out.println("Start");
 		while(timeoutReached() == false) {
 			

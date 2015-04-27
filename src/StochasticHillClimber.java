@@ -5,7 +5,6 @@ import java.util.Random;
  */
 public class StochasticHillClimber extends Heuristic {
 
-    public static final int EMPTY_ROOM = -1;
     protected int currentValue;
 
     private Random random = new XORShiftRandom();
@@ -14,7 +13,7 @@ public class StochasticHillClimber extends Heuristic {
 	public Schedule search(Schedule schedule) {
         startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
-        courseAssignmentCount = getCourseAssignmentCount(schedule);
+        deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
 
         int rooms = this.basicInfo.rooms;
         int days = this.basicInfo.days;

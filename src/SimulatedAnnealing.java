@@ -37,7 +37,7 @@ public class SimulatedAnnealing extends Heuristic{
 		System.out.println("Start");
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
-        courseAssignmentCount = getCourseAssignmentCount(schedule);
+        deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
 	    while(!timeoutReached()) {
 	    	this.IterationCount++; //Adds to the iteration count
 	    	if(IterationCount % 100000 == 0)

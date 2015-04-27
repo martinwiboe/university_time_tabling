@@ -4,7 +4,7 @@ public class Schedule {
 	public Schedule(int days, int periods, int rooms) {
 		assignments = new int[days][periods][rooms];
 
-		// Initialize all assignments to -1, meaning no course
+		// initialize all assignments to -1, meaning no course
 		for (int d = 0; d < assignments.length; d++) {
 			for (int p = 0; p < assignments[d].length; p++) {
 				for (int r = 0; r < assignments[d][p].length; r++) {

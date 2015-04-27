@@ -7,6 +7,8 @@ import java.util.Random;
  * Created by Martin on 05-04-2015.
  */
 public abstract class Heuristic {
+    public static final int EMPTY_ROOM = -1;
+
     /**
      * Perform a search with the input schedule as a starting point. The method will return the best schedule
      * found before timeout.
@@ -17,13 +19,6 @@ public abstract class Heuristic {
     public abstract Schedule search(Schedule schedule);
 
     private int timeout = 300;
-
-    /**
-     * @return the duration, in seconds, that the heuristic is allowed to search for solutions.
-     */
-    public int getTimeout() {
-        return timeout;
-    }
 
     /**
      * Sets the duration, in seconds, that the heuristic is allowed to search for solutions.
@@ -96,7 +91,6 @@ public abstract class Heuristic {
     public Courses courses;
     public Unavailability unavailability;
     public Rooms rooms;
-    public int[] courseAssignmentCount;
 
     /**
      * Checks that courses in the same curriculum are not scheduled in the same time slots
@@ -172,7 +166,7 @@ public abstract class Heuristic {
      */
 	public boolean validateMaximumScheduleCountConstraint(Schedule schedule) {
         for (int course = 0; course < basicInfo.courses; course++) {
-            if (courseAssignmentCount[course] > courses.numberOfLecturesForCourse[course])
+            if (deltaState.courseAssignmentCount[course] > courses.numberOfLecturesForCourse[course])
                 return false;
         }
         return true;
@@ -389,7 +383,7 @@ public abstract class Heuristic {
     	}
     	
     	//to calculate the amount of capacity that room is exceeded in a timeslot
-    	int leftOverCapacity = 0;
+    	int capacityExceeding = 0;
     	
     	for(int day = 0; day < basicInfo.days; day++){
     		for(int period = 0; period < basicInfo.periodsPerDay; period++){
@@ -398,7 +392,7 @@ public abstract class Heuristic {
     				int course = schedule.assignments[day][period][room];
     				if(course != -1){
     					if(this.rooms.capacityForRoom[room] < this.courses.numberOfStudentsForCourse[course])
-        					leftOverCapacity += (this.courses.numberOfStudentsForCourse[course] - this.rooms.capacityForRoom[room]);
+        					capacityExceeding += (this.courses.numberOfStudentsForCourse[course] - this.rooms.capacityForRoom[room]);
         			}
     			}		
     		}
