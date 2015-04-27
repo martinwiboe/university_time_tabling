@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import java.io.Writer;
+=======
+import java.io.FileWriter;
+import java.io.IOException;
+>>>>>>> origin/master
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -16,16 +21,27 @@ public class HillClimber extends Heuristic {
 
 	protected Schedule schedule; //current schedule 
 	//protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
-	protected int IterationCount = 0;
 	protected int currentValue;
 	private Random Rand = new XORShiftRandom();
 	private Map<Integer,Integer> unScheduledCourses;
+<<<<<<< HEAD
 	private CSVWriter writer = null;
     private Writer f;
     private CSVWriter wr;
     
+=======
+	
+	
+	public HillClimber() throws IOException {
+		super();
+		 f = new FileWriter(this.getClass()+"iterationValue.csv");
+	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
+	}
+
+
+>>>>>>> origin/master
 	@Override
-	public Schedule search(Schedule schedule) {
+	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
 		currentValue = evaluationFunction(schedule); // value of the current solution
         courseAssignmentCount = getCourseAssignmentCount(schedule);
@@ -39,13 +55,9 @@ public class HillClimber extends Heuristic {
 		boolean done = false;
 		
 	    System.out.println("Start");
-		while(!timeoutReached() && !done) { 
-			done = true; //Runs while there are still changes being made
+		while(!timeoutReached()) { 
 			//System.out.println("Iteration Count = " + IterationCount);
-			this.IterationCount++; //Adds to the iteration count
-			if(this.IterationCount%1000 == 0)
-			System.err.println("Iteration Count  = " + this.IterationCount );
-			int currentBestValue  = currentValue;
+			this.iterationCount++; //Adds to the iteration count
 			
 			for(int day=0;day<this.basicInfo.days;day++) { //run thorough all the days
 
@@ -165,13 +177,14 @@ public class HillClimber extends Heuristic {
 		
 				
 			}
-			if(currentBestValue<currentValue) {
-				done = false;
-				currentValue = currentBestValue;
-			}
 			
-		}
-		
-		return schedule;
+			if(iterationCount%1000 == 0){
+	           	 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+	       	     writer.writeNext(result);
+	            }
+	        }
+	        writer.flush();
+	        f.close();
+	        return schedule;
 	}	
 }

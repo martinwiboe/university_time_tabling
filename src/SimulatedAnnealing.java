@@ -24,9 +24,6 @@ public class SimulatedAnnealing extends Heuristic{
     private int bestCourse1;
     private int bestCourse2;
     private Random Rand = new XORShiftRandom();
-    private CSVWriter writer = null;
-    private Writer f;
-    private CSVWriter wr;
     
     
 	public SimulatedAnnealing(double temperature,double tempchange) throws IOException {
@@ -34,9 +31,8 @@ public class SimulatedAnnealing extends Heuristic{
 		this.temperature = temperature;
 		this.tempchange = tempchange;
 		// write iteration value to a CSV file
-	     f = new FileWriter("iterationValue.csv");
-	     wr = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
-	    this.writer = wr;
+	     f = new FileWriter(this.getClass()+Float.toString((float) temperature)+Float.toString((float) tempchange)+"iterationValue.csv");
+	     writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
 	}
 
 
@@ -147,15 +143,24 @@ public class SimulatedAnnealing extends Heuristic{
 	    	
 	    	// TODO write results to a CSV file
        
+<<<<<<< HEAD
 	    		temperature= temperature*tempchange; //Reduces the temperature
 	    		if(iterationCount%10000 == 0){
 	    		 String[] result = new String[] { "" + iterationCount, currentValue + "" };
 	    	     writer.writeNext(result);
 	    		}
+=======
+	    		 temperature= temperature*tempchange; //Reduces the temperature
+	    		 if(iterationCount%10000 == 0) {
+	    			 String[] result = new String[] { "" + iterationCount, currentValue + "" };
+		    	     writer.writeNext(result);
+	    		 }
+	    		 
+>>>>>>> origin/master
 	    	
 	}
 	   
-	    wr.flush();
+	    writer.flush();
         f.close();
 		return schedule;
 	}
