@@ -1,6 +1,9 @@
+import java.io.FileWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.Random;
 
+import com.opencsv.CSVWriter;
 
 
 public class SimulatedAnnealing extends Heuristic{
@@ -23,17 +26,22 @@ public class SimulatedAnnealing extends Heuristic{
     private Random Rand = new XORShiftRandom();
    
     
-    
 	public SimulatedAnnealing(double temperature,double tempchange) {
 		super();
 		this.temperature = temperature;
 		this.tempchange = tempchange;
+		// write iteration value to a CSV file
+	    Writer f = new FileWriter("iterationValue.csv");
+	    CSVWriter wr = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
+	    SimulatedAnnealing s = new SimulatedAnnealing(temperature,tempchange);
+	    s.writer = wr;
 	}
 
 
 	@Override
 	public Schedule search(Schedule schedule) {
 		
+	    
 		System.out.println("Start");
 		startCountdown();
         currentValue = evaluationFunction(schedule); // value of the current solution
@@ -134,10 +142,15 @@ public class SimulatedAnnealing extends Heuristic{
 				break;
 			}
 	    	
+	    	// TODO write results to a CSV file
+            String[] result = new String[] { "" + iterationCount, currentValue + "" };
+            writer.writeNext(result);
 	    		temperature= temperature*tempchange; //Reduces the temperature
 	    
 	    	
 	}
+	    wr.flush();
+        f.close();
 		return schedule;
 	}
 	
