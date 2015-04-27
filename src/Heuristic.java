@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,8 +14,9 @@ public abstract class Heuristic {
      * This method is abstract and must be implemented according to the chosen heuristic.
      * @param schedule The Schedule to start from
      * @return The most optimal schedule found during search.
+     * @throws IOException 
      */
-    public abstract Schedule search(Schedule schedule);
+    public abstract Schedule search(Schedule schedule) throws IOException;
 
     private int timeout = 300;
 
