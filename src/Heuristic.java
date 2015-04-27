@@ -400,13 +400,24 @@ public abstract class Heuristic {
         totalDelta += deltaState.getDeltaWhenAdding(day2, period2, room2, currentCourse);
         constraintsSatisfied = deltaState.deltaValidateAllConstraints(day2, period2, currentCourse);
 
+        // Assign the course so we can compute the delta
+        // Only assign course in slot 2
+        assignCourse(schedule, day2, period2, room2, currentCourse);
+
         if (constraintsSatisfied) {
-            // only compute the second delta if the first constraint is satistified
+            // Only compute the second delta if the first constraint is satistified
             totalDelta += deltaState.getDeltaWhenAdding(day, period, room, currentCourse2);
             constraintsSatisfied = deltaState.deltaValidateAllConstraints(day, period, currentCourse2);
+            // It is not necessary to actually assign the course in slot 1
         }
 
+        // Only course assigned at this point is time slot 2
+
         // Revert the changes by reassigning the courses. Then return the computed value.
+        // Remove course in time slot 2, so both slots are empty
+        removeCourse(schedule, day2, period2, room2);
+
+        // An reassign both courses
         assignCourse(schedule, day, period, room, currentCourse);
         assignCourse(schedule, day2, period2, room2, currentCourse2);
 
