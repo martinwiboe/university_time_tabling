@@ -55,89 +55,12 @@ public abstract class Heuristic {
     }
 
 	public int iterationCount = 0;
-
-    /**
-     * Checks that courses with the same lecturer is not assigned in same time slots
-     * @return true if the constraint is satisfied
-     */
-    public boolean validateSameLecturerConstraint(Schedule schedule) {
-        // For a given day, keep track of which lecturers are busy
-        boolean[] lecturerBusy;
-        for (int day = 0; day < basicInfo.days; day++) {
-            for (int period = 0; period < basicInfo.periodsPerDay; period++) {
-                // Assume all lecturers are idle
-                lecturerBusy = new boolean[basicInfo.lecturers];
-
-                for (int room = 0; room < basicInfo.rooms; room++) {
-                    // Check which course, if any, is assigned to this room at this time
-                    int assignedCourse = schedule.assignments[day][period][room];
-                    if (assignedCourse == -1)
-                        continue;
-
-                    // Remember that the lecturer is busy. If we already know this, the constraint is violated.
-                    int lecturer = courses.lecturerForCourse[assignedCourse];
-                    if (lecturerBusy[lecturer])
-                        return false;
-                    lecturerBusy[lecturer] = true;
-                }
-            }
-        }
-
-        return true;
-    }
-
     public BasicInfo basicInfo;
     public Curriculum curriculum;
     public Lecturers lecturers;
     public Courses courses;
     public Unavailability unavailability;
     public Rooms rooms;
-
-    /**
-     * Checks that courses in the same curriculum are not scheduled in the same time slots
-     * @return true if the constraint is satisfied
-     */
-    public boolean validateSameCurriculumConstraint(Schedule schedule) {
-        // For a given day, keep track of which lecturers are busy
-        boolean[] curriculumBusy;
-        for (int day = 0; day < basicInfo.days; day++) {
-            for (int period = 0; period < basicInfo.periodsPerDay; period++) {
-                // Assume all curricula are idle
-                curriculumBusy = new boolean[basicInfo.curricula];
-
-                for (int room = 0; room < basicInfo.rooms; room++) {
-                    // Check which course, if any, is assigned to this room at this time
-                    int assignedCourse = schedule.assignments[day][period][room];
-                    if (assignedCourse == -1)
-                        continue;
-
-                    for (int curriculum = 0; curriculum < basicInfo.curricula; curriculum++) {
-                        if (this.curriculum.isCourseInCurriculum[assignedCourse][curriculum]) {
-                            if (curriculumBusy[curriculum])
-                                return false;
-                            curriculumBusy[curriculum] = true;
-                        }
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Checks that courses are not scheduled in unavailable time slots
-     * @return true if the constraint is satisfied
-     */
-    public boolean validateAvailabilityConstraint(Schedule schedule) {
-        // Iterate through all constraints and check whether any have been violated
-        for (UnavailabilityConstraint c : unavailability.constraints) {
-            for (int room = 0; room < basicInfo.rooms; room++) {
-                if (schedule.assignments[c.day][c.period][room] == c.course)
-                    return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Returns an array containing the number of times each course has been scheduled
@@ -157,18 +80,6 @@ public abstract class Heuristic {
 
         return result;
     }
-
-    /**
-     * Validates that no course has been scheduled more than the minimum number of times.
-     * @return true if the constraint is not violated by the current schedule
-     */
-	public boolean validateMaximumScheduleCountConstraint() {
-        for (int course = 0; course < basicInfo.courses; course++) {
-            if (deltaState.courseAssignmentCount[course] > courses.numberOfLecturesForCourse[course])
-                return false;
-        }
-        return true;
-	}
 
 	private Random rand = new XORShiftRandom();
 
@@ -461,74 +372,6 @@ public abstract class Heuristic {
         // Return the delta value plus the current value
         int delta = deltaState.getDeltaWhenRemoving(day, period, room, currentCourse);
         return currentValue + delta;
-    }
-
-	/**
-	 * Gets the value of the solution if it is altered by assigning a specific course in a given time slot and room.
-	 * This method return Integer.MAX_VALUE if the room is already occupied.
-	 * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated.
-	 */
-	@Deprecated
-	protected int valueIfAssigningCourseOld(Schedule schedule, int day, int room, int period, int courseId) {
-		// Room must currently be empty
-		if (schedule.assignments[day][period][room] != Heuristic.EMPTY_ROOM) {
-			return Integer.MAX_VALUE;
-		}
-
-		int currentValue = evaluationFunction(schedule);
-		int delta = deltaState.getDeltaWhenAdding(day, period, room, courseId);
-
-		// Assign the course
-		assignCourse(schedule, day, period, room, courseId);
-
-		// Validate all constraints
-		if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
-			// Revert the change and return a large value
-			removeCourse(schedule, day, period, room);
-			return Integer.MAX_VALUE;
-		}
-
-		// Compute the value of the altered solution
-		int value = evaluationFunction(schedule);
-
-		// Revert the change and return the computed value
-		removeCourse(schedule, day, period, room);
-
-		int con = value - currentValue;
-		assert con == delta;
-
-		return value;
-	}
-
-    /**
-     * Gets the value of the solution if the given time slot and room is emptied
-     * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
-     */
-    @Deprecated
-    protected int valueIfRemovingCourseOld(Schedule schedule, int day, int room, int period) {
-        // Room must currently be occupied
-        int currentCourse = schedule.assignments[day][period][room];
-        if (currentCourse == Heuristic.EMPTY_ROOM) {
-            return Integer.MAX_VALUE;
-        }
-
-        // Empty the room
-        removeCourse(schedule, day, period, room);
-
-        // Validate constraints
-        if (!validateSameLecturerConstraint(schedule) || !validateSameCurriculumConstraint(schedule) || !validateAvailabilityConstraint(schedule) || !validateMaximumScheduleCountConstraint()) {
-            // Proposed solution is invalid. Revert the change and return a large value.
-            assignCourse(schedule, day, period, room, currentCourse);
-            return Integer.MAX_VALUE;
-        }
-
-        // Compute the value of the altered solution
-        int value = evaluationFunction(schedule);
-
-        // Revert the change and return the computed value
-        assignCourse(schedule, day, period, room, currentCourse);
-
-        return value;
     }
 
     /**
