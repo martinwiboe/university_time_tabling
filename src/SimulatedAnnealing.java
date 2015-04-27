@@ -77,14 +77,21 @@ public class SimulatedAnnealing extends Heuristic{
 	    	
 	    	Type change;
 	    	if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
+	    		if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
 	    			if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE)
 	    			 change = Type.REMOVE;
 	    			else 
 	    				change = Type.NOTHING;
-	    		
+	    		}
+	    		else {
+	    			 change = Type.SWAP;
+	    		}
 	    	}
 	    	else {
-	    		change = Type.ASSIGN;
+	    		if(valueIfThisCourseIsAssigned<valueIfThisCoursesAreSwapped)
+	    			change = Type.ASSIGN;
+	    		else 
+	    			change = Type.SWAP;
 	    	}
 	    	switch (change) {
 			case REMOVE:{
@@ -108,6 +115,28 @@ public class SimulatedAnnealing extends Heuristic{
 	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0) {
 	    			currentValue +=deltaval;
 	    			assignCourse(schedule, day1, period1, room1, courseId);
+	    		}
+				break;
+			}
+			case SWAP: {
+				deltaval = valueIfThisCoursesAreSwapped - currentValue;
+	    		if(deltaval < 0) { 
+	    			currentValue  = valueIfThisCoursesAreSwapped;
+	    			bestCourse1 = schedule.assignments[day1][period1][room1];//Remembers the person for the taboolist
+					bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
+					removeCourse(schedule, day2, period2, room2);
+					removeCourse(schedule, day1, period1, room1);
+					assignCourse(schedule, day2, period2, room2, bestCourse1);
+					assignCourse(schedule, day1, period1, room1, bestCourse2);
+	    		}
+	    		else if(GetProbability() > Rand.nextDouble()  && deltaval!=0 ) {
+	    			currentValue  = valueIfThisCoursesAreSwapped;
+	    			bestCourse1 = schedule.assignments[day1][period1][room1];//Remembers the person for the taboolist
+					bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the person for the taboolist
+					removeCourse(schedule, day2, period2, room2);
+					removeCourse(schedule, day1, period1, room1);
+					assignCourse(schedule, day2, period2, room2, bestCourse1);
+					assignCourse(schedule, day1, period1, room1, bestCourse2);
 	    		}
 				break;
 			}
