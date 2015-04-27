@@ -549,16 +549,24 @@ public abstract class Heuristic {
      * Gets the value of the solution if two lectures are swapped
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
      */
-    protected int valueIfSwappingCourses(Schedule schedule, int day, int period,int room,int day2,int period2,int room2) {
-        // Room must currently be occupied
+    protected int valueIfSwappingCourses(Schedule schedule, int currentValue, int day, int period,int room,int day2,int period2,int room2) {
+        // Both rooms must currently be occupied
         int currentCourse = schedule.assignments[day][period][room];
         int currentCourse2 = schedule.assignments[day2][period2][room2];
- 
+
+        int totalDelta = 0;
 
         // Swap the rooms
+        totalDelta += deltaState.getDeltaWhenRemoving(day, period, room, currentCourse);
         removeCourse(schedule, day, period, room);
+
+        totalDelta += deltaState.getDeltaWhenRemoving(day2, period2, room2, currentCourse2);
         removeCourse(schedule, day2, period2, room2);
+
+        totalDelta += deltaState.getDeltaWhenAdding(day2, period2, room2, currentCourse);
         assignCourse(schedule, day2, period2, room2, currentCourse);
+
+        totalDelta += deltaState.getDeltaWhenAdding(day, period, room, currentCourse2);
         assignCourse(schedule, day, period, room, currentCourse2);
 
         // Validate constraints
@@ -571,15 +579,13 @@ public abstract class Heuristic {
             return Integer.MAX_VALUE;
         }
 
-        // Compute the value of the altered solution
-        int value = evaluationFunction(schedule);
-
         // Revert the change and return the computed value
         removeCourse(schedule, day, period, room);
         removeCourse(schedule, day2, period2, room2);
         assignCourse(schedule, day, period, room, currentCourse);
         assignCourse(schedule, day2, period2, room2, currentCourse2);
-        return value;
+
+        return currentValue + totalDelta;
     }
     
     protected void assignCourse(Schedule schedule, int day, int period, int room, int course) {

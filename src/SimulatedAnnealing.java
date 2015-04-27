@@ -55,7 +55,7 @@ public class SimulatedAnnealing extends Heuristic{
 	    		period2 = Rand.nextInt(this.basicInfo.periodsPerDay);
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room2  = Rand.nextInt(this.basicInfo.rooms);
-	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day1, period1,room1,day2,period2,room2);	
+	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, currentValue, day1, period1,room1,day2,period2,room2);
 	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day1, room1, period1);
 	    		courseId = Rand.nextInt(this.basicInfo.courses);
 	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day1, room1, period1, courseId);

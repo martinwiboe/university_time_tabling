@@ -49,7 +49,7 @@ import java.util.Vector;
  									//int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
  									int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
  									//TODO:also check the values if with emoving and adding methods
- 									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, period,room, day2, period2, room2);
+ 									valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, currentValue, day, period,room, day2, period2, room2);
  									if(currentValue>valueIfThisCoursesAreSwapped && IsTaboo(schedule.assignments[day][period][room], schedule.assignments[day2][period2][room2]) == false) {
  										currentValue = valueIfThisCoursesAreSwapped;
  										bestCourse1 = schedule.assignments[day][period][room];//Remembers the person for the taboolist

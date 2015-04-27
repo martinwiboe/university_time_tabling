@@ -76,7 +76,7 @@ public class HillClimber extends Heuristic {
                     valueIfThisCourseIsRemoved = valueIfRemovingCourse(schedule, currentValue, day, room, period);
                     int courseId = Rand.nextInt(this.basicInfo.courses);
                     valueIfThisCourseIsAssigned = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseId);
-                    valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, day, period, room, day2, period2, room2);
+                    valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, currentValue, day, period, room, day2, period2, room2);
                     Type change;
                     if (valueIfThisCourseIsRemoved <= valueIfThisCourseIsAssigned) {
                         if (valueIfThisCourseIsRemoved <= valueIfThisCoursesAreSwapped) {
