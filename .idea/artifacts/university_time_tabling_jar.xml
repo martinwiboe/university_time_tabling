@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="university_time_tabling:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/university_time_tabling_jar</output-path>
+    <root id="archive" name="university_time_tabling.jar">
+      <element id="module-output" name="university_time_tabling" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/opencsv-3.3.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
