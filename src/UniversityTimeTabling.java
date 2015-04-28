@@ -36,7 +36,8 @@ public class UniversityTimeTabling {
         Arrays.asList(args).subList(2, args.length).toArray(arguments);
 
         // SET THIS TO THE AMOUNT OF LOGICAL PROCESSORS IN YOUR MACHINE
-        int threadCount = 4;
+        int threadCount = Runtime.getRuntime().availableProcessors();
+        System.out.println("Running " + threadCount + " simultaneous benchmarks");
         int i = 0;
         Thread[] threads = new Thread[threadCount];
         while (i < iterationCount)
