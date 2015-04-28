@@ -1,7 +1,5 @@
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -67,9 +65,9 @@ public class SimulatedAnnealing extends Heuristic{
 	    		room1  = Rand.nextInt(this.basicInfo.rooms);
 	    		room2  = Rand.nextInt(this.basicInfo.rooms);
 	    		valueIfThisCoursesAreSwapped = valueIfSwappingCourses(schedule, currentValue, day1, period1,room1,day2,period2,room2);
-	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day1, room1, period1);
+	    		valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day1, period1, room1);
 	    		courseId = Rand.nextInt(this.basicInfo.courses);
-	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day1, room1, period1, courseId);
+	    		valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day1, period1, room1, courseId);
 	    		if(!( valueIfThisCourseIsRemoved == Integer.MAX_VALUE && valueIfThisCourseIsAssigned == Integer.MAX_VALUE))
 	    			hardConstraintViolation =  false;
 	

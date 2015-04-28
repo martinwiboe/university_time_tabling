@@ -4,8 +4,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.Vector;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
-
 import com.opencsv.CSVWriter;
 
 
@@ -43,6 +41,9 @@ public class StochasticTABU extends Heuristic {
 
 	}
 
+    private int[][][] bestSolution;
+    private int bestSolutionValue;
+
 	@Override
 	public Schedule search(Schedule schedule) throws IOException {
 		startCountdown();
@@ -53,15 +54,13 @@ public class StochasticTABU extends Heuristic {
 		int rooms = this.basicInfo.rooms;
 		int days = this.basicInfo.days;
 		int periods = this.basicInfo.periodsPerDay;
-		System.out.println("Start");
-		while(timeoutReached() == false) {
-			if(currentValue<0) {
-				System.err.println("currentValue = "+currentValue);
-				System.exit(0);
-			}
-			else 
-				System.err.println("currentValue = "+currentValue);
-				
+
+        bestSolution = new int[days][periods][rooms];
+        cloneArray(schedule.assignments, bestSolution);
+        bestSolutionValue = currentValue;
+
+
+		while(!timeoutReached()) {
 			this.iterationCount++; //Adds to the iteration count
 			int room = random.nextInt(rooms);
 			int day = random.nextInt(days);
@@ -74,14 +73,16 @@ public class StochasticTABU extends Heuristic {
 			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
 			int courseId = random.nextInt(this.basicInfo.courses);
 			if(schedule.assignments[day][period][room] != -1)
-			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day, room, period); //calculate the value if we remove the course given timeslot
+			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day, period, room); //calculate the value if we remove the course given timeslot
 			else {
-				valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseId); //calculate the value if we swap the courses given timeslots
+				valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day, period, room, courseId); //calculate the value if we swap the courses given timeslots
 				//if(schedule.assignments[day2][period2][room2] != -1)
 			}
 			
 			
 			valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, currentValue, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
+
+
 			Type change;
 			//we have the new values now we need to choose which action would be the best according to new values
 			if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
@@ -101,9 +102,7 @@ public class StochasticTABU extends Heuristic {
 				else 
 					change = Type.SWAP;//choose swap if the swapping gives the best value
 			}
-			if(valueIfThisCourseIsRemoved<0 || valueIfThisCourseIsAssigned<0 || valueIfThisCoursesAreSwapped<0) {
-				System.err.println("valueIfThisCourseIsRemoved = " + valueIfThisCourseIsRemoved + " valueIfThisCourseIsAssigned = "+ valueIfThisCourseIsAssigned+ " valueIfThisCoursesAreSwapped = "+ valueIfThisCoursesAreSwapped );
-			}
+
 			switch (change) {
 			case REMOVE:{ 
 				bestdayPeriodRoom1 = new Integer[3];
@@ -115,7 +114,7 @@ public class StochasticTABU extends Heuristic {
 				bestdayPeriodRoom2[1] = REMOVENO;
 				bestdayPeriodRoom2[2] = REMOVENO;
 				bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for taboo list
-				if(valueIfThisCourseIsRemoved < currentValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+				if(!IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) {
 					currentValue  = valueIfThisCourseIsRemoved;
 					removeCourse(schedule, day, period, room);
 					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2);//we add the course in the tabo list with the REMOVENO so when we check the taboo list we will know its assigned
@@ -131,7 +130,7 @@ public class StochasticTABU extends Heuristic {
 				bestdayPeriodRoom2[0] = ASSIGNNO;
 				bestdayPeriodRoom2[1] = ASSIGNNO;
 				bestdayPeriodRoom2[2] = ASSIGNNO;
-				if(valueIfThisCourseIsAssigned < currentValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+				if(!IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) {
 					currentValue  =valueIfThisCourseIsAssigned;
 					assignCourse(schedule, day, period, room, courseId);
 					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //we add the course in the tabo list with the ASSIGNNO so when we check the taboo list we will know its assigned
@@ -149,12 +148,16 @@ public class StochasticTABU extends Heuristic {
 				bestdayPeriodRoom2[2] = room2;
 				//bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for to assign
 				//bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the course for to assign
-				if(valueIfThisCoursesAreSwapped < currentValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+				if(!IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) {
 					currentValue  = valueIfThisCoursesAreSwapped;
-					removeCourse(schedule, day2, period2, room2);
+
+                    int course1 = schedule.assignments[day][period][room];
+                    int course2 = schedule.assignments[day2][period2][room2];
+
+                    removeCourse(schedule, day2, period2, room2);
 					removeCourse(schedule, day, period, room);
-					assignCourse(schedule, day2, period2, room2, bestCourse1);
-					assignCourse(schedule, day, period, room, bestCourse2);
+					assignCourse(schedule, day2, period2, room2, course1);
+					assignCourse(schedule, day, period, room, course2);
 					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //Makes the swap back taboo.
 				}
 				break;
@@ -165,7 +168,15 @@ public class StochasticTABU extends Heuristic {
 			}
 
 
+			if(currentValue<0) {
+				System.err.println("currentValue = "+currentValue);
+				System.exit(0);
+			}
 
+            if (currentValue < bestSolutionValue) {
+                cloneArray(schedule.assignments, bestSolution);
+                bestSolutionValue = currentValue;
+            }
 
 			if((float)Math.abs(previousValue-currentValue)/currentValue >= 0.05 ) {
 				result = new String[] { "" + iterationCount, currentValue + "" };

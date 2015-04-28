@@ -32,6 +32,18 @@ public abstract class Heuristic {
     }
 
     /**
+     * Clones an array by copying its contents to an existing destination array.
+     */
+    protected static void cloneArray(int[][][] array, int[][][] destination) {
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[i].length; j++) {
+                System.arraycopy(array[i][j], 0, destination[i][j], 0,
+                        array[i][j].length);
+            }
+        }
+    }
+
+    /**
      * The millisecond time when the countdown was started.
      */
     private long countdownStartTime;
