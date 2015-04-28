@@ -31,23 +31,35 @@ public class UniversityTimeTabling {
         // solve the problem several times - and output intermediate results
         int iterationCount = Integer.parseInt(args[1]);
 
-        // write results to a CSV file
-        Writer fi = new FileWriter("output.csv");
-        CSVWriter w = new CSVWriter(fi, ',', CSVWriter.NO_QUOTE_CHARACTER);
-
         // "cut off" the first two parameters
         String[] arguments = new String[args.length - 1];
         Arrays.asList(args).subList(2, args.length).toArray(arguments);
-        for (int i = 0; i < iterationCount; i++) {
-            UniversityTimeTabling t = new UniversityTimeTabling();
-            t.enableBenchmarking = true;
-            t.writer = w;
-            t.startWithParameters(arguments);
-        }
 
-        w.flush();
-        fi.close();
+        // SET THIS TO THE AMOUNT OF LOGICAL PROCESSORS IN YOUR MACHINE
+        int threadCount = 4;
+        int i = 0;
+        Thread[] threads = new Thread[threadCount];
+        while (i < iterationCount)
+        {
+            int j = 0;
+            while (j < threadCount && i < iterationCount) {
+                BenchmarkLauncher b = new BenchmarkLauncher();
+                b.arguments = arguments;
+                b.iteration = i;
+
+                Thread t = new Thread(b);
+                threads[j] = t;
+                t.start();
+                j++;
+                i++;
+            }
+
+            for (int k = 0; k < j; k++)
+                threads[k].join();
+        }
     }
+
+
 
 
     public boolean enableBenchmarking = false;
