@@ -353,7 +353,7 @@ public abstract class Heuristic {
      * This method return Integer.MAX_VALUE if the room is already occupied.
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated.
      */
-    protected int valueIfAssigningCourse(Schedule schedule, int currentValue, int day, int room, int period, int courseId) {
+    protected int valueIfAssigningCourse(Schedule schedule, int currentValue, int day, int period, int room, int courseId) {
         // Room must currently be empty
         if (schedule.assignments[day][period][room] != Heuristic.EMPTY_ROOM) {
             return Integer.MAX_VALUE;
@@ -374,7 +374,7 @@ public abstract class Heuristic {
      * Gets the value of the solution if the given time slot and room is emptied
      * @return The value of the modified solution, or Integer.MAX_VALUE if a constraint is violated
      */
-    protected int valueIfRemovingCourse(Schedule schedule, int currentValue, int day, int room, int period) {
+    protected int valueIfRemovingCourse(Schedule schedule, int currentValue, int day, int period, int room) {
         // Room must currently be occupied
         int currentCourse = schedule.assignments[day][period][room];
         if (currentCourse == Heuristic.EMPTY_ROOM) {
