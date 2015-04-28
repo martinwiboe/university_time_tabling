@@ -1,8 +1,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Random;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.*;
 
 import com.opencsv.CSVWriter;
 
@@ -24,8 +22,8 @@ public class StochasticTABU extends Heuristic {
 	protected Vector<Integer> tabooList2; //The second taboolist - ONLY TABOOSEARCH
 	private Integer[] bestdayPeriodRoom1;
 	private Integer [] bestdayPeriodRoom2;
-	protected Vector<Integer[]> tabooListSlots1; //The first taboolist - ONLY TABOOSEARCH
-	protected Vector<Integer[]> tabooListSlots2; //The second taboolist - ONLY TABOOSEARCH
+	protected LinkedList<Integer[]> tabooListSlots1; //The first taboolist - ONLY TABOOSEARCH
+	protected LinkedList<Integer[]> tabooListSlots2; //The second taboolist - ONLY TABOOSEARCH
 	private static final int ASSIGNNO = -2;
 	private static final int REMOVENO = -3;
 	public StochasticTABU(int TabooLength) throws IOException
@@ -33,8 +31,8 @@ public class StochasticTABU extends Heuristic {
 		this.tabooLength = TabooLength;
 		//tabooList1  = new Vector<Integer>();
 		//tabooList2  = new Vector<Integer>();
-		tabooListSlots1 = new Vector<Integer[]>();
-		tabooListSlots2 = new  Vector<Integer[]>();
+		tabooListSlots1 = new LinkedList<Integer[]>();
+		tabooListSlots2 = new  LinkedList<Integer[]>();
 		String uuid = UUID.randomUUID().toString();
 		f = new FileWriter(this.getClass()+Integer.toString(tabooLength)+uuid+"iterationValue.csv");
 		writer = new CSVWriter(f, ',', CSVWriter.NO_QUOTE_CHARACTER);
@@ -173,7 +171,7 @@ public class StochasticTABU extends Heuristic {
 				System.exit(0);
 			}
 
-            if (currentValue < bestSolutionValue) {
+            if (currentValue < bestSolutionValue && iterationCount > 40000) {
                 cloneArray(schedule.assignments, bestSolution);
                 bestSolutionValue = currentValue;
             }
@@ -287,9 +285,16 @@ public class StochasticTABU extends Heuristic {
 	{
 		
 		if(dayPeriodRoom2[0] == REMOVENO) {
+
+            Iterator<Integer[]> iterator = tabooListSlots2.iterator();
+            for (Integer[] taboo : tabooListSlots1) {
+                Integer[] tabooList2Element = iterator.next();
+                if (Arrays.equals(taboo, dayPeriodRoom1) && tabooList2Element[0] == ASSIGNNO)
+                    return true;
+            }
+/*
 			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 			{
-				
 				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
 				{
 					
@@ -300,8 +305,16 @@ public class StochasticTABU extends Heuristic {
 					}
 				}				
 			}
+			*/
 		}
 		else if (dayPeriodRoom2[0] == ASSIGNNO) {
+            Iterator<Integer[]> iterator = tabooListSlots2.iterator();
+            for (Integer[] taboo : tabooListSlots1) {
+                Integer[] tabooList2Element = iterator.next();
+                if (Arrays.equals(taboo, dayPeriodRoom1) && tabooList2Element[0] == REMOVENO)
+                    return true;
+            }
+/*
 			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 
 			{
@@ -314,9 +327,21 @@ public class StochasticTABU extends Heuristic {
 					}
 				}				
 			}
+			*/
 		}
 		
 		else {
+            // check for swaps
+
+            Iterator<Integer[]> iterator = tabooListSlots2.iterator();
+            for (Integer[] taboo : tabooListSlots1) {
+                Integer[] tabooList2Element = iterator.next();
+                if (Arrays.equals())
+
+                if (Arrays.equals(taboo, dayPeriodRoom1) && tabooList2Element[0] == ASSIGNNO)
+                    return true;
+            }
+
 			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 			{
 				
