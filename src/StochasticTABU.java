@@ -55,7 +55,13 @@ public class StochasticTABU extends Heuristic {
 		int periods = this.basicInfo.periodsPerDay;
 		System.out.println("Start");
 		while(timeoutReached() == false) {
-
+			if(currentValue<0) {
+				System.err.println("currentValue = "+currentValue);
+				System.exit(0);
+			}
+			else 
+				System.err.println("currentValue = "+currentValue);
+				
 			this.iterationCount++; //Adds to the iteration count
 			int room = random.nextInt(rooms);
 			int day = random.nextInt(days);
@@ -66,9 +72,15 @@ public class StochasticTABU extends Heuristic {
 			int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
 			int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
 			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
-			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day, room, period); //calculate the value if we remove the course given timeslot
 			int courseId = random.nextInt(this.basicInfo.courses);
-			valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseId); //calculate the value if we swap the courses given timeslots
+			if(schedule.assignments[day][period][room] != -1)
+			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day, room, period); //calculate the value if we remove the course given timeslot
+			else {
+				valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day, room, period, courseId); //calculate the value if we swap the courses given timeslots
+				//if(schedule.assignments[day2][period2][room2] != -1)
+			}
+			
+			
 			valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, currentValue, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
 			Type change;
 			//we have the new values now we need to choose which action would be the best according to new values
@@ -89,8 +101,9 @@ public class StochasticTABU extends Heuristic {
 				else 
 					change = Type.SWAP;//choose swap if the swapping gives the best value
 			}
-
-			int deltaval;
+			if(valueIfThisCourseIsRemoved<0 || valueIfThisCourseIsAssigned<0 || valueIfThisCoursesAreSwapped<0) {
+				System.err.println("valueIfThisCourseIsRemoved = " + valueIfThisCourseIsRemoved + " valueIfThisCourseIsAssigned = "+ valueIfThisCourseIsAssigned+ " valueIfThisCoursesAreSwapped = "+ valueIfThisCoursesAreSwapped );
+			}
 			switch (change) {
 			case REMOVE:{ 
 				bestdayPeriodRoom1 = new Integer[3];
@@ -101,10 +114,9 @@ public class StochasticTABU extends Heuristic {
 				bestdayPeriodRoom2[0] = REMOVENO;
 				bestdayPeriodRoom2[1] = REMOVENO;
 				bestdayPeriodRoom2[2] = REMOVENO;
-				deltaval =  valueIfThisCourseIsRemoved - currentValue;
 				bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for taboo list
-				if(deltaval < 0 && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
-					currentValue  +=deltaval;
+				if(valueIfThisCourseIsRemoved < currentValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+					currentValue  = valueIfThisCourseIsRemoved;
 					removeCourse(schedule, day, period, room);
 					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2);//we add the course in the tabo list with the REMOVENO so when we check the taboo list we will know its assigned
 				}
@@ -119,9 +131,8 @@ public class StochasticTABU extends Heuristic {
 				bestdayPeriodRoom2[0] = ASSIGNNO;
 				bestdayPeriodRoom2[1] = ASSIGNNO;
 				bestdayPeriodRoom2[2] = ASSIGNNO;
-				deltaval =  valueIfThisCourseIsAssigned - currentValue;
-				if(deltaval < 0 && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
-					currentValue  +=deltaval;
+				if(valueIfThisCourseIsAssigned < currentValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+					currentValue  =valueIfThisCourseIsAssigned;
 					assignCourse(schedule, day, period, room, courseId);
 					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //we add the course in the tabo list with the ASSIGNNO so when we check the taboo list we will know its assigned
 				}
@@ -136,10 +147,9 @@ public class StochasticTABU extends Heuristic {
 				bestdayPeriodRoom2[0] = day2;
 				bestdayPeriodRoom2[1] = period2;
 				bestdayPeriodRoom2[2] = room2;
-				deltaval = valueIfThisCoursesAreSwapped - currentValue;
 				//bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for to assign
 				//bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the course for to assign
-				if(deltaval < 0 && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+				if(valueIfThisCoursesAreSwapped < currentValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
 					currentValue  = valueIfThisCoursesAreSwapped;
 					removeCourse(schedule, day2, period2, room2);
 					removeCourse(schedule, day, period, room);
@@ -250,13 +260,13 @@ public class StochasticTABU extends Heuristic {
 	public void AddTaboo(Integer[] dayPeriodRoom1,Integer[] dayPeriodRoom2)
 	{
 		//If the list is full, the first added is now removed
-		if(this.tabooList1.size() == this.tabooLength)
+		if(this.tabooListSlots1.size() == this.tabooLength)
 		{
-			this.tabooList1.remove(0);
-			this.tabooList2.remove(0);
+			this.tabooListSlots1.remove(0);
+			this.tabooListSlots1.remove(0);
 		}
 		this.tabooListSlots1.add(dayPeriodRoom1);
-		this.tabooListSlots1.add(dayPeriodRoom2);
+		this.tabooListSlots2.add(dayPeriodRoom2);
 	}
 
 	/**
@@ -266,11 +276,13 @@ public class StochasticTABU extends Heuristic {
 	{
 		
 		if(dayPeriodRoom2[0] == REMOVENO) {
-			for (int i = 0 ; i < this.tabooList1.size(); i++)
+			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 			{
 				
 				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
 				{
+					
+					
 					if(tabooListSlots2.elementAt(i)[0] == ASSIGNNO)
 					{
 						return true;
@@ -279,7 +291,7 @@ public class StochasticTABU extends Heuristic {
 			}
 		}
 		else if (dayPeriodRoom2[0] == ASSIGNNO) {
-			for (int i = 0 ; i < this.tabooList1.size(); i++)
+			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 
 			{
 				
@@ -294,7 +306,7 @@ public class StochasticTABU extends Heuristic {
 		}
 		
 		else {
-			for (int i = 0 ; i < this.tabooList1.size(); i++)
+			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 			{
 				
 				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
