@@ -76,7 +76,7 @@ public class UniversityTimeTabling {
         String unavailabilityFile = args[6];
 
         // Create the heuristic
-        Heuristic heuristic = new StochasticTABU(10);
+        Heuristic heuristic = new ExhaustiveTABU(); // StochasticTABU(20);
         heuristic.setTimeout(timeout);
         print("Using heuristic " + heuristic.getClass().getSimpleName());
         print("Running for " + timeout + " seconds");
@@ -123,7 +123,7 @@ public class UniversityTimeTabling {
 
         int objectiveValue;
         debug("Calculating objective value");
-        objectiveValue = heuristic.evaluationFunction(initialSchedule);
+        objectiveValue = heuristic.evaluationFunction(solution);
 
         print("Found a solution in " + heuristic.iterationCount + " iterations");
         print("The value is " + objectiveValue);
