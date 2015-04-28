@@ -4,6 +4,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.Vector;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import com.opencsv.CSVWriter;
 
 
@@ -12,10 +14,8 @@ import com.opencsv.CSVWriter;
  */
 public class StochasticTABU extends Heuristic {
 
-	protected Schedule schedule; //current schedule 
-	protected Schedule currentSchedule; //the copy of the current schedule where changes are made, that are not certain to be saved
-	protected int currentValue;
-	protected int previousValue = Integer.MAX_VALUE;
+	
+	protected int previousBestValue = Integer.MAX_VALUE;
 	private int tabooLength;
 	private int bestCourse1;
 	private int bestCourse2;
@@ -41,159 +41,197 @@ public class StochasticTABU extends Heuristic {
 
 	}
 
-    private int[][][] bestSolution;
-    private int bestSolutionValue;
-
 	@Override
-	public Schedule search(Schedule schedule) throws IOException {
+	public Schedule search(Schedule currentSchedule) throws IOException {
 		startCountdown();
-		currentValue = evaluationFunction(schedule); // value of the current solution
+		Schedule currentBestSchedule;
+		Schedule bestSchedule;
+		currentBestSchedule  =new Schedule(this.basicInfo.days, this.basicInfo.periodsPerDay, this.basicInfo.rooms);
+		bestSchedule  =new Schedule(this.basicInfo.days, this.basicInfo.periodsPerDay, this.basicInfo.rooms);
+		cloneArray(currentSchedule.assignments, currentBestSchedule.assignments);
+		int currentValue;
+		int currentBestValue ;
+		int bestValue = Integer.MAX_VALUE;
+		currentValue = evaluationFunction(currentSchedule); // value of the current solution
 		String[] result = new String[] { "" + iterationCount, currentValue + "" };
 		writer.writeNext(result);
-		deltaState.courseAssignmentCount = getCourseAssignmentCount(schedule);
+		deltaState.courseAssignmentCount = getCourseAssignmentCount(currentSchedule);
 		int rooms = this.basicInfo.rooms;
 		int days = this.basicInfo.days;
 		int periods = this.basicInfo.periodsPerDay;
-
-        bestSolution = new int[days][periods][rooms];
-        cloneArray(schedule.assignments, bestSolution);
-        bestSolutionValue = currentValue;
-
-
-		while(!timeoutReached()) {
+		System.out.println("Start");
+		
+		while(timeoutReached() == false) {
+			currentBestValue = Integer.MAX_VALUE;
+			
 			this.iterationCount++; //Adds to the iteration count
-			int room = random.nextInt(rooms);
-			int day = random.nextInt(days);
-			int period = random.nextInt(periods);
-			int room2 = random.nextInt(rooms);
-			int day2 = random.nextInt(days);
-			int period2 = random.nextInt(periods);
-			int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
-			int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
-			int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
-			int courseId = random.nextInt(this.basicInfo.courses);
-			if(schedule.assignments[day][period][room] != -1)
-			valueIfThisCourseIsRemoved  = valueIfRemovingCourse(schedule, currentValue, day, period, room); //calculate the value if we remove the course given timeslot
-			else {
-				valueIfThisCourseIsAssigned  = valueIfAssigningCourse(schedule, currentValue, day, period, room, courseId); //calculate the value if we swap the courses given timeslots
-				//if(schedule.assignments[day2][period2][room2] != -1)
-			}
 			
 			
-			valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(schedule, currentValue, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
+			for(int day=0;day<this.basicInfo.days;day++) { //run thorough all the days
 
+				for(int period =  0;period<this.basicInfo.periodsPerDay;period++) { //all the periods
 
-			Type change;
-			//we have the new values now we need to choose which action would be the best according to new values
-			if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
-				if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
-					if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE) 
-						change = Type.REMOVE;//if removing the course gives the best value then choose remove
-					else 
-						change = Type.NOTHING;//that means we have Max_int value so we do nothing in this iteration
+					for(int room = 0;room<this.basicInfo.rooms;room++){ //all the rooms
+						int room2 = random.nextInt(rooms);
+						int day2 = random.nextInt(days);
+						int period2 = random.nextInt(periods);
+						
+						while((day==day2)&&(period==period2)&&(room==room2) ) {
+							room2 = random.nextInt(rooms);
+							day2 = random.nextInt(days);
+							period2 = random.nextInt(periods);
+						}
+						
+						int valueIfThisCourseIsAssigned  = Integer.MAX_VALUE;
+						int valueIfThisCourseIsRemoved  = Integer.MAX_VALUE;
+						int valueIfThisCoursesAreSwapped  = Integer.MAX_VALUE;
+						int courseId = random.nextInt(this.basicInfo.courses);
+						if(currentSchedule.assignments[day][period][room] != StochasticHillClimber.EMPTY_ROOM) {			
+							valueIfThisCourseIsRemoved  = valueIfRemovingCourse(currentSchedule, currentValue, day,period, room ); //calculate the value if we remove the course given timeslot
+						}
+						else {
+							valueIfThisCourseIsAssigned  = valueIfAssigningCourse(currentSchedule, currentValue, day,period, room , courseId); //calculate the value if we swap the courses given timeslots
+						}
+						
+						
+						valueIfThisCoursesAreSwapped  = valueIfSwappingCourses(currentSchedule, currentValue, day, period, room, day2, period2, room2);//calculate the value if we add the course given timeslot
+						//System.err.println("valueIfThisCourseIsRemoved =  " + valueIfThisCourseIsRemoved + " valueIfThisCourseIsAssigned  ="+ valueIfThisCourseIsAssigned+ " valueIfThisCoursesAreSwapped  =" + valueIfThisCoursesAreSwapped);
+						/*if(currentValue<0) {
+						System.err.println("currentValue  = "+currentValue );
+						System.exit(0);
+						}
+						System.err.println("valueIfThisCoursesAreSwapped  = "+valueIfThisCoursesAreSwapped );
+						System.err.println("valueIfThisCourseIsAssigned  = "+valueIfThisCourseIsAssigned );
+						System.err.println("valueIfThisCourseIsRemoved  = "+valueIfThisCourseIsRemoved );
+						*/
+						
+						Type change;
+						//we have the new values now we need to choose which action would be the best according to new values (find the best neighboor)
+						if(valueIfThisCourseIsRemoved<=valueIfThisCourseIsAssigned){
+							if(valueIfThisCourseIsRemoved<=valueIfThisCoursesAreSwapped) {
+								if(valueIfThisCourseIsRemoved != Integer.MAX_VALUE) 
+									change = Type.REMOVE;//if removing the course gives the best value then choose remove
+								else 
+									change = Type.NOTHING;//that means we have Max_int value so we do nothing in this iteration
+							}
+							else {
+								change = Type.SWAP;//choose swap if the swapping gives the best value
+							}
+						}
+						else {
+							if(valueIfThisCourseIsAssigned<valueIfThisCoursesAreSwapped)
+								change = Type.ASSIGN; //choose assign if the assigning gives the best value
+							else 
+								change = Type.SWAP;//choose swap if the swapping gives the best value
+						}
+						//System.err.println("" + currentBestValue);
+						switch (change) {
+						case REMOVE:{ 	
+									
+								bestdayPeriodRoom1 = new Integer[3];
+								bestdayPeriodRoom1[0] = day;
+								bestdayPeriodRoom1[1] = period;
+								bestdayPeriodRoom1[2] = room;
+								bestdayPeriodRoom2 = new Integer[3];
+								bestdayPeriodRoom2[0] = REMOVENO;
+								bestdayPeriodRoom2[1] = REMOVENO;
+								bestdayPeriodRoom2[2] = REMOVENO;
+									
+								if(valueIfThisCourseIsRemoved < currentBestValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+									currentBestValue = valueIfThisCourseIsRemoved;
+									int courseName = currentSchedule.assignments[day][period][room];//Remembers the course for change back
+									removeCourse(currentSchedule, day, period, room);	
+									cloneArray(currentSchedule.assignments, currentBestSchedule.assignments);
+									assignCourse(currentSchedule, day, period, room, courseName);
+								}
+								//swap back changes in current schedule
+								
+								break;
+						}
+						case ASSIGN: {
+							
+								bestdayPeriodRoom1 = new Integer[3];
+								bestdayPeriodRoom1[0] = day;
+								bestdayPeriodRoom1[1] = period;
+								bestdayPeriodRoom1[2] = room;
+								bestdayPeriodRoom2 = new Integer[3];
+								bestdayPeriodRoom2[0] = ASSIGNNO;
+								bestdayPeriodRoom2[1] = ASSIGNNO;
+								bestdayPeriodRoom2[2] = ASSIGNNO;
+										
+								if(valueIfThisCourseIsAssigned < currentBestValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+									assignCourse(currentSchedule, day, period, room, courseId);
+									currentBestValue = valueIfThisCourseIsAssigned;
+									cloneArray(currentSchedule.assignments, currentBestSchedule.assignments);
+									//swap back changes in current schedule
+									removeCourse(currentSchedule, day, period, room);
+								}
+								
+								
+								break;
+						}
+						case SWAP: {
+							bestdayPeriodRoom1 = new Integer[3];
+							bestdayPeriodRoom1[0] = day;
+							bestdayPeriodRoom1[1] = period;
+							bestdayPeriodRoom1[2] = room;
+							bestdayPeriodRoom2 = new Integer[3];
+							bestdayPeriodRoom2[0] = day2;
+							bestdayPeriodRoom2[1] = period2;
+							bestdayPeriodRoom2[2] = room2;
+							
+							if(valueIfThisCoursesAreSwapped < currentBestValue && !IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) { 
+								bestCourse1 = currentSchedule.assignments[day][period][room];//Remembers the course for to assign
+								bestCourse2 = currentSchedule.assignments[day2][period2][room2]; //Remembers the course for to assign
+								removeCourse(currentSchedule, day2, period2, room2);
+								removeCourse(currentSchedule, day, period, room);
+								assignCourse(currentSchedule, day2, period2, room2, bestCourse1);
+								assignCourse(currentSchedule, day, period, room, bestCourse2); 
+								currentBestValue = valueIfThisCoursesAreSwapped;
+								cloneArray(currentSchedule.assignments, currentBestSchedule.assignments);
+								//swap back changes in current schedule
+								removeCourse(currentSchedule, day2, period2, room2);
+								removeCourse(currentSchedule, day, period, room);
+								assignCourse(currentSchedule, day, period, room, bestCourse1);
+								assignCourse(currentSchedule, day2, period2, room2, bestCourse2); 
+							}
+							
+							break;
+						}
+						default:
+							break;
+						}
+						
+					}
 				}
-				else {
-					change = Type.SWAP;//choose swap if the swapping gives the best value
-				}
 			}
-			else {
-				if(valueIfThisCourseIsAssigned<valueIfThisCoursesAreSwapped)
-					change = Type.ASSIGN; //choose assign if the assigning gives the best value
-				else 
-					change = Type.SWAP;//choose swap if the swapping gives the best value
+			//save the current best schedule we are going to start searching there next iteration
+			cloneArray( currentBestSchedule.assignments,currentSchedule.assignments);
+			if(currentBestValue!=Integer.MAX_VALUE)
+				currentValue = currentBestValue;
+			AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2);//we add the course in the tabo list with the REMOVENO so when we check the taboo list we will know its assigned
+			if( currentBestValue<bestValue) { 
+				bestValue = currentBestValue; 
+				cloneArray( currentBestSchedule.assignments,bestSchedule.assignments);
 			}
-
-			switch (change) {
-			case REMOVE:{ 
-				bestdayPeriodRoom1 = new Integer[3];
-				bestdayPeriodRoom1[0] = day;
-				bestdayPeriodRoom1[1] = period;
-				bestdayPeriodRoom1[2] = room;
-				bestdayPeriodRoom2 = new Integer[3];
-				bestdayPeriodRoom2[0] = REMOVENO;
-				bestdayPeriodRoom2[1] = REMOVENO;
-				bestdayPeriodRoom2[2] = REMOVENO;
-				bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for taboo list
-				if(!IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) {
-					currentValue  = valueIfThisCourseIsRemoved;
-					removeCourse(schedule, day, period, room);
-					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2);//we add the course in the tabo list with the REMOVENO so when we check the taboo list we will know its assigned
-				}
-				break;
-			}
-			case ASSIGN: {
-				bestdayPeriodRoom1 = new Integer[3];
-				bestdayPeriodRoom1[0] = day;
-				bestdayPeriodRoom1[1] = period;
-				bestdayPeriodRoom1[2] = room;
-				bestdayPeriodRoom2 = new Integer[3];
-				bestdayPeriodRoom2[0] = ASSIGNNO;
-				bestdayPeriodRoom2[1] = ASSIGNNO;
-				bestdayPeriodRoom2[2] = ASSIGNNO;
-				if(!IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) {
-					currentValue  =valueIfThisCourseIsAssigned;
-					assignCourse(schedule, day, period, room, courseId);
-					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //we add the course in the tabo list with the ASSIGNNO so when we check the taboo list we will know its assigned
-				}
-				break;
-			}
-			case SWAP: {
-				bestdayPeriodRoom1 = new Integer[3];
-				bestdayPeriodRoom1[0] = day;
-				bestdayPeriodRoom1[1] = period;
-				bestdayPeriodRoom1[2] = room;
-				bestdayPeriodRoom2 = new Integer[3];
-				bestdayPeriodRoom2[0] = day2;
-				bestdayPeriodRoom2[1] = period2;
-				bestdayPeriodRoom2[2] = room2;
-				//bestCourse1 = schedule.assignments[day][period][room];//Remembers the course for to assign
-				//bestCourse2 = schedule.assignments[day2][period2][room2]; //Remembers the course for to assign
-				if(!IsTaboo(bestdayPeriodRoom1,bestdayPeriodRoom2)) {
-					currentValue  = valueIfThisCoursesAreSwapped;
-
-                    int course1 = schedule.assignments[day][period][room];
-                    int course2 = schedule.assignments[day2][period2][room2];
-
-                    removeCourse(schedule, day2, period2, room2);
-					removeCourse(schedule, day, period, room);
-					assignCourse(schedule, day2, period2, room2, course1);
-					assignCourse(schedule, day, period, room, course2);
-					AddTaboo(bestdayPeriodRoom1, bestdayPeriodRoom2); //Makes the swap back taboo.
-				}
-				break;
-			}
-
-			default:
-				break;
-			}
-
-
-			if(currentValue<0) {
-				System.err.println("currentValue = "+currentValue);
-				System.exit(0);
-			}
-
-            if (currentValue < bestSolutionValue) {
-                cloneArray(schedule.assignments, bestSolution);
-                bestSolutionValue = currentValue;
-            }
-
-			if((float)Math.abs(previousValue-currentValue)/currentValue >= 0.05 ) {
-				result = new String[] { "" + iterationCount, currentValue + "" };
+			
+			if((float)Math.abs(previousBestValue-bestValue)/bestValue >= 0.05 ) {
+				result = new String[] { "" + iterationCount, bestValue + "" };
 				writer.writeNext(result);
-				previousValue = currentValue;
+				previousBestValue = bestValue;
 			}
-
+			
 
 		}
 
-		result = new String[] { "" + iterationCount, currentValue + "" };
+		result = new String[] { "" + iterationCount, bestValue + "" };
 		writer.writeNext(result);
 		writer.flush();
 		f.close();
-		System.out.println("Tabu  Found A Solution!");
-		System.out.println("Value  = "+evaluationFunction(schedule));
-		return schedule;
+		//System.out.println("Tabu  Found A Solution!");
+		//System.out.println("Value  = "+evaluationFunction(currentBestSchedule));
+		cloneArray( bestSchedule.assignments,currentBestSchedule.assignments);
+		return currentBestSchedule;
 	}	
 
 	/**
@@ -305,7 +343,7 @@ public class StochasticTABU extends Heuristic {
 			for (int i = 0 ; i < this.tabooListSlots1.size(); i++)
 
 			{
-				
+				//System.err.println(" size = " + tabooListSlots1.size() + " index = " +i);
 				if(tabooListSlots1.elementAt(i)[0] == dayPeriodRoom1[0] && tabooListSlots1.elementAt(i)[1] == dayPeriodRoom1[1] && tabooListSlots1.elementAt(i)[2] == dayPeriodRoom1[2] )  
 				{
 					if(tabooListSlots2.elementAt(i)[0] == REMOVENO)
