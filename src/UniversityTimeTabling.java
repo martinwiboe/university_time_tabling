@@ -28,44 +28,51 @@ public class UniversityTimeTabling {
             return;
         }
 
-        // solve the problem several times - and output intermediate results
-        int iterationCount = Integer.parseInt(args[1]);
+        String[] tests = new String[]{ //"Test01", "Test02","Test03","Test04","Test05","Test06",
+                "Test07","Test08","Test09","Test10","Test11","Test12","Test13"};
+        for (String test : tests) {
+            // solve the problem several times - and output intermediate results
+            int iterationCount = Integer.parseInt(args[1]);
 
-        // "cut off" the first two parameters
-        String[] arguments = new String[args.length - 1];
-        Arrays.asList(args).subList(2, args.length).toArray(arguments);
+            // "cut off" the first two parameters
+            String[] arguments = new String[args.length - 1];
+            Arrays.asList(args).subList(2, args.length).toArray(arguments);
 
-        Writer fi = new FileWriter("output.csv");
-        CSVWriter w = new CSVWriter(fi, ',', CSVWriter.NO_QUOTE_CHARACTER);
+            Writer fi = new FileWriter(test +  "_hillclimber_60sec_output.csv");
+            CSVWriter w = new CSVWriter(fi, ',', CSVWriter.NO_QUOTE_CHARACTER);
 
-
-        // SET THIS TO THE AMOUNT OF LOGICAL PROCESSORS IN YOUR MACHINE
-        int threadCount = Runtime.getRuntime().availableProcessors();
-        System.out.println("Running " + threadCount + " simultaneous benchmarks");
-        int i = 0;
-        Thread[] threads = new Thread[threadCount];
-        while (i < iterationCount)
-        {
-            int j = 0;
-            while (j < threadCount && i < iterationCount) {
-                BenchmarkLauncher b = new BenchmarkLauncher();
-                b.arguments = arguments;
-                b.iteration = i;
-                b.writer = w;
-
-                Thread t = new Thread(b);
-                threads[j] = t;
-                t.start();
-                j++;
-                i++;
+            for (int ar = 0; ar < arguments.length - 2; ar++) {
+                arguments[ar] = "..\\" + test + "\\" + arguments[ar];
+                System.out.println(arguments[ar]);
             }
 
-            for (int k = 0; k < j; k++)
-                threads[k].join();
-        }
+            // SET THIS TO THE AMOUNT OF LOGICAL PROCESSORS IN YOUR MACHINE
+            int threadCount = Runtime.getRuntime().availableProcessors();
+            System.out.println("Running " + threadCount + " simultaneous benchmarks");
+            int i = 0;
+            Thread[] threads = new Thread[threadCount];
+            while (i < iterationCount) {
+                int j = 0;
+                while (j < threadCount && i < iterationCount) {
+                    BenchmarkLauncher b = new BenchmarkLauncher();
+                    b.arguments = arguments;
+                    b.iteration = i;
+                    b.writer = w;
 
-        w.flush();
-        fi.close();
+                    Thread t = new Thread(b);
+                    threads[j] = t;
+                    t.start();
+                    j++;
+                    i++;
+                }
+
+                for (int k = 0; k < j; k++)
+                    threads[k].join();
+            }
+
+            w.flush();
+            fi.close();
+        }
     }
 
 
@@ -97,7 +104,8 @@ public class UniversityTimeTabling {
         String unavailabilityFile = args[6];
 
         // Create the heuristic
-        Heuristic heuristic = new ExhaustiveTABU(); // StochasticTABU(20);
+        Heuristic heuristic = new StochasticHillClimber(); // StochasticTABU(20);
+        // heuristic.tabooListLength = 10;
         heuristic.setTimeout(timeout);
         print("Using heuristic " + heuristic.getClass().getSimpleName());
         print("Running for " + timeout + " seconds");
