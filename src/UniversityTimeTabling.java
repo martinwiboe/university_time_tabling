@@ -35,6 +35,10 @@ public class UniversityTimeTabling {
         String[] arguments = new String[args.length - 1];
         Arrays.asList(args).subList(2, args.length).toArray(arguments);
 
+        Writer fi = new FileWriter("output.csv");
+        CSVWriter w = new CSVWriter(fi, ',', CSVWriter.NO_QUOTE_CHARACTER);
+
+
         // SET THIS TO THE AMOUNT OF LOGICAL PROCESSORS IN YOUR MACHINE
         int threadCount = Runtime.getRuntime().availableProcessors();
         System.out.println("Running " + threadCount + " simultaneous benchmarks");
@@ -47,6 +51,7 @@ public class UniversityTimeTabling {
                 BenchmarkLauncher b = new BenchmarkLauncher();
                 b.arguments = arguments;
                 b.iteration = i;
+                b.writer = w;
 
                 Thread t = new Thread(b);
                 threads[j] = t;
@@ -58,6 +63,9 @@ public class UniversityTimeTabling {
             for (int k = 0; k < j; k++)
                 threads[k].join();
         }
+
+        w.flush();
+        fi.close();
     }
 
 
@@ -146,9 +154,11 @@ public class UniversityTimeTabling {
         }
 
         if (enableBenchmarking && writer != null) {
-            // TODO write results to a CSV file
-            String[] result = new String[] { "" + objectiveValue, heuristic.getClass().getSimpleName(), heuristic.iterationCount + "" };
-            writer.writeNext(result);
+            synchronized (writer) {
+                // TODO write results to a CSV file
+                String[] result = new String[]{"" + objectiveValue, heuristic.getClass().getSimpleName(), heuristic.iterationCount + ""};
+                writer.writeNext(result);
+            }
         }
     }
 
