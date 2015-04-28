@@ -1,4 +1,7 @@
 public class ExhaustiveTABU extends TABUHeuristic {
+
+    public boolean considerSwaps = true;
+
     @Override
     protected TABUOperationResult bestSolutionInNeighborhood() {
         TABUOperationResult result = new TABUOperationResult();
@@ -22,6 +25,38 @@ public class ExhaustiveTABU extends TABUHeuristic {
                                 result.scheduleValueAfterApplying = newValue;
                             }
                         }
+
+                        // Consider swapping with all other courses
+                        if (considerSwaps) {
+                            for (int day2 = 0; day2 < basicInfo.days; day2++) {
+                                for (int period2 = 0; period2 < basicInfo.periodsPerDay; period2++) {
+                                    for (int room2 = 0; room2 < basicInfo.rooms; room2++) {
+                                        int otherCourse = currentSchedule.assignments[day2][period2][room2];
+                                        if (otherCourse == EMPTY_ROOM || otherCourse <= assignedCourse)
+                                            continue;
+
+                                        int newValueAfterSwap = valueIfSwappingCourses(currentSchedule, currentScheduleValue, day, period, room, day2, period2, room2);
+                                        if (newValueAfterSwap < result.scheduleValueAfterApplying) {
+                                            TABUOperation operation = new TABUOperation();
+                                            operation.day = day;
+                                            operation.period = period;
+                                            operation.room = room;
+                                            operation.otherDay = day2;
+                                            operation.otherPeriod = period2;
+                                            operation.otherRoom = room2;
+                                            operation.type = OperationType.Swap;
+
+                                            if (!isTaboo(operation)) {
+                                                result.operation = operation;
+                                                result.scheduleValueAfterApplying = newValueAfterSwap;
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+
                     } else {
                         for (int course = 0; course < basicInfo.courses; course++) {
                             int newValue = valueIfAssigningCourse(currentSchedule, currentScheduleValue, day, period, room, course);
