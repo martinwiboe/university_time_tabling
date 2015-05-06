@@ -1,0 +1,408 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+
+\documentclass{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+
+\usepackage{graphicx} % Allows including images
+\usepackage{amssymb}
+\usepackage{algorithmic}
+%\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\makeatletter
+\newenvironment{algorithm}[1][]{%
+  \def\@captype{algorithm}%
+  \par\nobreak\begin{center}\nobreak}
+  {\par\nobreak\end{center}\nobreak}
+\newcounter{algorithm}
+\renewcommand\thealgorithm{\@arabic\c@algorithm}
+\makeatother
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{Optimization using Meta-heuristics
+University Timetabling} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+
+\author{Martin Wiboe,  Burak Topal, Too Sheng Tack  } % Your name
+
+
+\institute[DTU] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+
+DTU 2015
+ \\ % Your institution for the title page
+\medskip
+
+}
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents 
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Introduction} 
+%------------------------------------------------
+
+
+\begin{frame}
+\frametitle{Introduction}
+
+Every semester universities face the problem of creating good feasible timetable due to many complex constraints that have to be taken into consideration.
+\begin{itemize}
+\item Limited room capacity
+\item A lecturer can teach more than one courses to be scheduled in different time slots
+\item A curriculum has more than one courses to be scheduled in different time slots
+\item Also lecturers and students have preferences
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Motivation}
+\begin{itemize}
+\item Better utilization of resources
+\item Atomized planning 
+\item TODO: continue motivation 
+\end{itemize}
+\end{frame}
+%------------------------------------------------
+
+\section{Problem Description} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+%------------------------------------------------
+
+
+
+
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Problem Description}
+
+\end{frame}
+%------------------------------------------------
+
+
+
+%------------------------------------------------
+
+
+%------------------------------------------------
+
+
+
+
+
+%------------------------------------------------
+
+%------------------------------------------------
+
+%------------------------------------------------
+
+
+%------------------------------------------------
+%------------------------------------------------
+%------------------------------------------------
+\section{Meta-heuristic} 
+\begin{frame}
+\frametitle{Meta-heuristics}
+A high level procedure to find a solution for given optimization problem.
+\begin{itemize}
+\item Efficient and practical 
+\item Do not guaranty the optimal solution
+\end{itemize}
+Different types of meta-heuristics:
+\begin{itemize}
+\item Hill Climber
+\item Simulated Annealing
+\item TABU
+\end{itemize}
+\end{frame}
+%------------------------------------------------
+\begin{frame}
+\frametitle{Hill Climber}
+Incremental local search algorithm. 
+\begin{itemize}
+\item Easy to implement
+\item Traps in local optimum
+\end{itemize}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\STATE {$select\;inital\;solution\;s_{0}$}
+\STATE {$s^{*}=s_{0}$}
+\REPEAT
+\STATE {$select\;s\;\in N(s^{*})$}
+\IF {$f(s) > f(s^{*})$}
+\STATE {$ s^{*} = s$}
+\ENDIF
+\UNTIL {$time\;limit\;reached$}
+\STATE{$\textbf{return}\;s^{*}$}
+\end{algorithmic}
+\caption{Hill Climber }
+\label{alg:seq}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}
+\frametitle{Hill Climber - Implementation Details}
+Stochastic Hill Climber
+\begin{itemize}
+\item Fast average number of \textbf{??} iteration per seconds
+\item Traps local optimum 
+\item Different results for every run
+\item Traps in local optimum
+\end{itemize}
+For each iteration selects the best state from two candidate Neighbours
+\begin{itemize}
+\item candidate state by removing a course in given time slot
+\item candidate state by adding given  course in given time slot
+\end{itemize}
+\end{frame}
+
+\begin{frame}[shrink=20]
+\frametitle {Simulated Annealing}
+Probabilistic optimization methods that uses the idea of the annealing process in thermodynamic.
+\begin{itemize}
+\item In high temperatures algorithm generally select the proposed action even it worse than the current solution.
+\item Decreases the temperature for each iteration with given parameter
+\end{itemize}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\STATE {$select\;inital\;solution\;s_{0}$}
+\STATE {$T=T_{start}$}
+\STATE {$s^{*}=s_{0}$}
+\REPEAT
+\STATE {$select\;s\;\in N(s^{*})$}
+\STATE {$\delta = f(s)- f(s^{*})$}
+\IF {$\delta<0 or with probablity p(\delta,t_{i}$}
+\STATE {$ s^{*} = s$}
+\ENDIF
+\STATE{$t_{i+1} = t_{i}*\alpha$}
+\UNTIL {$time\;limit\;reached$}
+\STATE{$\textbf{return}\;s^{*}$}
+\end{algorithmic}
+\caption{Simulated Annealing }
+\label{alg:seq}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}[shrink=20]
+\frametitle{Simulated Annealing  - Implementation Details}
+Each iteration algorithm calculates the delta value with remove, assign and swap actions and chooses the best one. 
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\STATE {$\textbf{Search}(s_{0},T_{start},\alpha)$}
+\STATE {$T=T_{start}$}
+\STATE {$s^{*}=s_{0}$}
+\REPEAT
+\REPEAT
+\STATE {$select\;day\;period\;room\;randomly$}
+\STATE {$calculate;new\;solutions\;by\;assign\;remove\;abd\;swap\;operations$}
+\UNTIL {$no\;hard\;constraint\;violations$}
+\STATE {$selectbestaction\;m\in\lbrace Remove,Assign,Swap\rbrace\;has\;lowest\;f(s_{i}\oplus m) $}
+\STATE {$\delta = f(s)- f(s_{i}\oplus m)$}
+\IF {$\delta<0 or with probablity p(\delta,t_{i}$}
+\STATE {$ s^{*} = s_{i}\oplus m$}
+\ENDIF
+\STATE{$t_{i+1} = t_{i}*\alpha$}
+\UNTIL {$time\;limit\;reached$}
+\STATE{$\textbf{return}\;s^{*}$}
+\end{algorithmic}
+\caption{Simulated Annealing - Pseudo Code}
+\label{alg:seq}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}
+\frametitle{TABU}
+Uses local search paradigm and memory for optimization.
+\begin{itemize}
+\item Generally finds better solution than the other optimization problems
+\item Contraction of the Tabu list is problem specific
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{TABU - Neighbourhood Function}
+The neighbours are the set of the different "\textit{next to}" solutions
+To generate neighbour program uses three different action:
+\begin{itemize}
+\item Remove: Program goes through all time slots if the current time slots is not empty than it uses the Remove method to generate new solution
+\item Swap: If current time slot is not empty then program goes through all the time slots and choose another non empty time slot and generate new solution by swapping
+\item Assign: If the current time slot is empty then program goes through the course list and assign current course in current time slot
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{TABU - Neighbourhood Function Cont.}
+Therefore for each iteration program generates;
+\begin{itemize}
+\item  $ d*p*r$ (max) number of neighbours by removing
+\item  $d*(d-1)*p*(p-1)r*(r*1) $ (max) number of neighbours by swapping 
+\item $ d*p*r*c$ (max) number of neighbours by by assigning
+\item total max $d*(d-1)*p*(p-1)r*(r*1) + d*p*r $ and min $ d*p*r*c$ neighbours are generated in each iteration
+\item d = number of days
+\item p = number of periods per day
+\item r = number of rooms
+\item c = number of courses
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks] 
+\frametitle{TABU  - Implementation Details}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\STATE {$\textbf{Search}(s_{0},taboLength)$}
+\STATE {$s^{*}=s_{0}$}
+\REPEAT
+\FOR{\textbf{each} $slot\;t_{1} \in set\lbrace day,period,room\rbrace $}
+\IF {$t_{1}\; is\; not\; empty$}
+\STATE {$ s_{n} = RemoveAt(t_{1}$}
+
+\IF {$f(s_{n})<f(s^{'})\;and\; RemoveAt(t)\;is\;not\;tabu$}
+\STATE {$ s^{'} = s_{n}$}
+\ENDIF
+\FOR{\textbf{each} $slot\;t_{2} \in set\lbrace day,period,room\rbrace $}
+\IF {$t_{2}\; is\; not\; empty$}
+\STATE {$ s_{n} = Swap(t_{1},t_{2})$}
+\IF {$f(s_{n})<f(s^{'})\;and\;  Swap(t_{1},t_{2})\;is\;not\;tabu$}
+\STATE {$ s^{'} = s_{n}$}
+\ENDIF
+\ENDIF
+\ENDFOR
+\ENDIF
+\IF {$t_{1}\; is\; empty$}
+\FOR{\textbf{each} $courses\;c \in \textit{CourseList} $}
+\STATE {$ s_{n} = Assign(t_{1},c)$}
+\IF {$f(s_{n})<f(s^{'})\;and\;  Assign(t_{1},c)\;is\;not\;tabu$}
+\STATE {$ s^{'} = s_{n}$}
+\ENDIF
+\ENDFOR
+\ENDIF
+\ENDFOR
+\STATE {$ s = s^{'}$}
+\STATE {$ AddTaboList(action)$}
+\IF {$f(s_{'})<f(s^{*})$}
+\STATE {$ s^{*} = s^{'}$}
+\ENDIF
+\UNTIL {$time\;limit\;reached$}
+\STATE{$\textbf{return}\;s^{*}$}
+\end{algorithmic}
+\caption{TABU - Pseudo Code}
+\label{alg:seq}
+\end{algorithm}
+\end{frame}
+
+\section{Results}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Results}
+\end{frame}
+
+%------------------------------------------------
+
+
+
+
+\section{Conclusion}
+%------------------------------------------------
+\begin{frame}
+\frametitle{Conclusion}
+
+\end{frame}
+
+
+\begin{frame}
+\Huge{\centerline{Questions}}
+\end{frame}
+
+\end{document}
