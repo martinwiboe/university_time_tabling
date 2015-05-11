@@ -369,31 +369,10 @@ Therefore for each iteration program generates;
 \STATE {$\textbf{Search}(s_{0},taboLength)$}
 \STATE {$s^{*}=s_{0}$}
 \REPEAT
-\FOR{\textbf{each} $slot\;t_{1} \in set\lbrace day,period,room\rbrace $}
-\IF {$t_{1}\; is\; not\; empty$}
-\STATE {$ s_{n} = RemoveAt(t_{1}$}
-
-\IF {$f(s_{n})<f(s^{'})\;and\; RemoveAt(t)\;is\;not\;tabu$}
-\STATE {$ s^{'} = s_{n}$}
+\STATE {$ Calculate all neighbours of s and select the best one $}
+\IF {$f(s_{neighbour})<f(s^{'}) and n=not in TABO List$}
+\STATE {$  s^{'} = neighbour$}
 \ENDIF
-\FOR{\textbf{each} $slot\;t_{2} \in set\lbrace day,period,room\rbrace $}
-\IF {$t_{2}\; is\; not\; empty$}
-\STATE {$ s_{n} = Swap(t_{1},t_{2})$}
-\IF {$f(s_{n})<f(s^{'})\;and\;  Swap(t_{1},t_{2})\;is\;not\;tabu$}
-\STATE {$ s^{'} = s_{n}$}
-\ENDIF
-\ENDIF
-\ENDFOR
-\ENDIF
-\IF {$t_{1}\; is\; empty$}
-\FOR{\textbf{each} $courses\;c \in \textit{CourseList} $}
-\STATE {$ s_{n} = Assign(t_{1},c)$}
-\IF {$f(s_{n})<f(s^{'})\;and\;  Assign(t_{1},c)\;is\;not\;tabu$}
-\STATE {$ s^{'} = s_{n}$}
-\ENDIF
-\ENDFOR
-\ENDIF
-\ENDFOR
 \STATE {$ s = s^{'}$}
 \STATE {$ AddTaboList(action)$}
 \IF {$f(s_{'})<f(s^{*})$}
