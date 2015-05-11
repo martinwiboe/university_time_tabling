@@ -75,6 +75,7 @@
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
 }
 
+\usepackage{listings}
 
 \usepackage{graphicx} % Allows including images
 \usepackage{amssymb}
@@ -92,11 +93,11 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title{Optimization using Meta-heuristics
+\title{Optimization using Metaheuristics\\
 University Timetabling} % The short title appears at the bottom of every slide, the full title is only on the title page
 
 
-\author{Martin Wiboe,  Burak Topal, Too Sheng Tack  } % Your name
+\author{Martin Wiboe, Burak Topal, Too Sheng Tack} % Your name
 
 
 \institute[DTU] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
@@ -110,6 +111,33 @@ DTU 2015
 \date{\today} % Date, can be changed to a custom date
 
 \begin{document}
+	\definecolor{darkgreen}{RGB}{0,100,0}
+	
+	\defverbatim[colored]\lstI{
+		\begin{lstlisting}[language=Java,basicstyle=\ttfamily,keywordstyle=\color{blue},commentstyle=\color{darkgreen}]
+// Total no. of lectures for a course
+int[] courseAssignmentCount
+
+// No. of course lectures on each day
+int[][] courseLecturesOnDay
+
+// No. of distinct working days for a course
+int[] courseWorkingDays
+		\end{lstlisting}
+	}
+	
+		\defverbatim[colored]\lstII{
+			\begin{lstlisting}[language=Java,basicstyle=\ttfamily,keywordstyle=\color{blue},commentstyle=\color{darkgreen}]
+// No. of lectures in room for each course
+int[][] lecturesInRoomForCourse
+
+// Is lecturer busy in given time slot?
+boolean[][][] lecturerBusy
+
+// Is curriculum assigned in given time slot?
+boolean[][][] curriculumAssigned
+			\end{lstlisting}
+		}
 
 \begin{frame}
 \titlepage % Print the title page as the first slide
@@ -131,7 +159,6 @@ DTU 2015
 
 \begin{frame}
 \frametitle{Introduction}
-
 Every semester universities face the problem of creating good feasible timetable due to many complex constraints that have to be taken into consideration.
 \begin{itemize}
 \item Limited room capacity
@@ -139,73 +166,83 @@ Every semester universities face the problem of creating good feasible timetable
 \item A curriculum has more than one courses to be scheduled in different time slots
 \item Also lecturers and students have preferences
 \end{itemize}
-
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Motivation}
-\begin{itemize}
-\item Better utilization of resources
-\item Atomized planning 
-\item TODO: continue motivation 
-\end{itemize}
 \end{frame}
 %------------------------------------------------
-
-\section{Problem Description} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
-%------------------------------------------------
-
-
-
-
-
-%------------------------------------------------
-
+\section{Metaheuristic} 
 \begin{frame}
-\frametitle{Problem Description}
-
-\end{frame}
-%------------------------------------------------
-
-
-
-%------------------------------------------------
-
-
-%------------------------------------------------
-
-
-
-
-
-%------------------------------------------------
-
-%------------------------------------------------
-
-%------------------------------------------------
-
-
-%------------------------------------------------
-%------------------------------------------------
-%------------------------------------------------
-\section{Meta-heuristic} 
-\begin{frame}
-\frametitle{Meta-heuristics}
+\frametitle{Metaheuristics}
 A high level procedure to find a solution for given optimization problem.
 \begin{itemize}
 \item Efficient and practical 
-\item Do not guaranty the optimal solution
+\item Do not guarantee an optimal solution
 \end{itemize}
-Different types of meta-heuristics:
+Different types of metaheuristics:
 \begin{itemize}
 \item Hill Climber
 \item Simulated Annealing
 \item TABU
 \end{itemize}
 \end{frame}
+
 %------------------------------------------------
+
+
+\begin{frame}
+	\frametitle{Neighborhood Function}
+	The neighbors are the set of different "\textit{adjacent}" solutions.
+	
+	Neighbors of a solution $S$ are all solutions that can be reached by applying one of these functions to $S$:
+	\begin{itemize}
+		\item \textbf{add} a lecture to the schedule by filling an empty room
+		\item \textbf{remove} a lecture that is currently scheduled, leaving an empty room
+		\item \textbf{swap} two scheduled lectures
+	\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\section{Delta Evaluation}
+\begin{frame}
+	\frametitle{Evaluating the Schedule}
+	To determine value of a schedule, our na{\"i}ve solution considers all:
+	\begin{itemize}
+		\item time slots
+		\item rooms
+		\item courses
+		\item curricula
+	\end{itemize}
+	
+	Time complexity is $\mathcal{O}(|T||R| + |T||C| + |T||Q|)$
+\end{frame}
+
+\begin{frame}
+	\frametitle{Delta Evaluation}
+	Extra bookkeeping to increase evaluation speed of modified solution.
+	
+	Trade memory and complexity for better performance.
+	
+	\begin{block}{Insights}
+		\begin{itemize}
+			\item \emph{add} and \emph{remove} only affects the given course $+$ neighbors.
+			\item \emph{swap} is equal to \{\emph{remove}, \emph{remove}, \emph{add}, \emph{add}\}
+		\end{itemize}	
+	\end{block}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Bookkeeping}
+	\lstI
+\end{frame}
+
+\begin{frame}
+	\frametitle{Bookkeeping cont.}
+	\lstII
+\end{frame}
+
+
+%------------------------------------------------
+
 \begin{frame}
 \frametitle{Hill Climber}
 Incremental local search algorithm. 
@@ -307,17 +344,6 @@ Uses local search paradigm and memory for optimization.
 \begin{itemize}
 \item Generally finds better solution than the other optimization problems
 \item Contraction of the Tabu list is problem specific
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{TABU - Neighbourhood Function}
-The neighbours are the set of the different "\textit{next to}" solutions
-To generate neighbour program uses three different action:
-\begin{itemize}
-\item Remove: Program goes through all time slots if the current time slots is not empty than it uses the Remove method to generate new solution
-\item Swap: If current time slot is not empty then program goes through all the time slots and choose another non empty time slot and generate new solution by swapping
-\item Assign: If the current time slot is empty then program goes through the course list and assign current course in current time slot
 \end{itemize}
 \end{frame}
 

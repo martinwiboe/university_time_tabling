@@ -1,6 +1,0 @@
-\beamer@endinputifotherversion {3.24pt}
-\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
-\beamer@sectionintoc {2}{Problem Description}{5}{0}{2}
-\beamer@sectionintoc {3}{Meta-heuristic}{6}{0}{3}
-\beamer@sectionintoc {4}{Results}{17}{0}{4}
-\beamer@sectionintoc {5}{Conclusion}{22}{0}{5}
