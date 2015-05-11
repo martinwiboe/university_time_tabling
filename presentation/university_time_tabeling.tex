@@ -158,14 +158,9 @@ boolean[][][] curriculumAssigned
 
 
 \begin{frame}
-\frametitle{Introduction}
+\frametitle{University Time Tabling}
 Every semester universities face the problem of creating good feasible timetable due to many complex constraints that have to be taken into consideration.
-\begin{itemize}
-\item Limited room capacity
-\item A lecturer can teach more than one courses to be scheduled in different time slots
-\item A curriculum has more than one courses to be scheduled in different time slots
-\item Also lecturers and students have preferences
-\end{itemize}
+
 \end{frame}
 %------------------------------------------------
 \section{Metaheuristic} 
@@ -284,15 +279,9 @@ Incremental local search algorithm.
 \frametitle{Hill Climber - Implementation Details}
 Stochastic Hill Climber
 \begin{itemize}
-\item Fast average number of \textbf{??} iteration per seconds
-\item Traps local optimum 
-\item Different results for every run
+\item Large number of iterations per second
+\item Non-deterministic: different results for every run
 \item Traps in local optimum
-\end{itemize}
-For each iteration selects the best state from two candidate Neighbours
-\begin{itemize}
-\item candidate state by removing a course in given time slot
-\item candidate state by adding given  course in given time slot
 \end{itemize}
 \end{frame}
 
@@ -312,7 +301,7 @@ Probabilistic optimization methods that uses the idea of the annealing process i
 \REPEAT
 \STATE {$select\;s\;\in N(s^{*})$}
 \STATE {$\delta = f(s)- f(s^{*})$}
-\IF {$\delta<0 or with probablity p(\delta,t_{i}$}
+\IF {$\delta<0\;or\;with\;probablity\;p(\delta,t_{i}$}
 \STATE {$ s^{*} = s$}
 \ENDIF
 \STATE{$t_{i+1} = t_{i}*\alpha$}
@@ -357,37 +346,23 @@ Uses local search paradigm and memory for optimization.
 \begin{itemize}
 \item Generally finds better solution than the other optimization problems
 \item Contraction of the Tabu list is problem specific
+\item For \textbf{add} and \textbf{swap}, courses are taboo. For \textbf{remove}, time slots are taboo.
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{TABU - Neighbourhood Function Cont.}
-Therefore for each iteration program generates;
-\begin{itemize}
-\item  $ d*p*r$ (max) number of neighbours by removing
-\item  $d*(d-1)*p*(p-1)r*(r*1) $ (max) number of neighbours by swapping 
-\item $ d*p*r*c$ (max) number of neighbours by by assigning
-\item total max $d*(d-1)*p*(p-1)r*(r*1) + d*p*r $ and min $ d*p*r*c$ neighbours are generated in each iteration
-\item d = number of days
-\item p = number of periods per day
-\item r = number of rooms
-\item c = number of courses
-\end{itemize}
-\end{frame}
-
-\begin{frame}[allowframebreaks] 
+\begin{frame}[shrink=20]
 \frametitle{TABU  - Implementation Details}
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
 \STATE {$\textbf{Search}(s_{0},taboLength)$}
 \STATE {$s^{*}=s_{0}$}
 \REPEAT
-\STATE {$ Calculate all neighbours of s and select the best one $}
-\IF {$f(s_{neighbour})<f(s^{'}) and n=not in TABO List$}
+\STATE {$ Calculate\;all\;neighbours\;of\;s\;and\;select\;the\;best\;one $}
+\IF {$f(neighbour)<f(s^{'})\;and\;n\;is\;not\;taboo$}
 \STATE {$  s^{'} = neighbour$}
 \ENDIF
 \STATE {$ s = s^{'}$}
-\STATE {$ AddTaboList(action)$}
+\STATE {$ AddTabooList(action)$}
 \IF {$f(s_{'})<f(s^{*})$}
 \STATE {$ s^{*} = s^{'}$}
 \ENDIF
