@@ -240,6 +240,19 @@ Different types of metaheuristics:
 	\lstII
 \end{frame}
 
+\begin{frame}
+	\frametitle{Delta Evaluation is Significantly Faster}
+	After optimizations:
+	
+	\begin{itemize}
+		\item evaluate a neighbor solution in $\mathcal{O}(q)$
+		\item update the bookkeeping state in $\mathcal{O}(q)$
+	\end{itemize}
+	
+	$q$ is number of curricula for affected course, typically few. Can be further reduced to $\mathcal{O}(1)$.
+	
+	Overall speedup in our tests was more than 200x, depending on the data set.
+\end{frame}
 
 %------------------------------------------------
 
@@ -432,11 +445,21 @@ Therefore for each iteration program generates;
 \begin{frame}
 \frametitle{Conclusion}
 
+\begin{itemize}
+	\item We used 3 different metaheuristics.
+	
+	\item Hill climber gets stuck in local optima.
+	
+	\item Simulated Annealing is very sensitive to parameters.
+	
+	\item TABU 5 gives consistently best results. Longer TABU lists are slower but might be warranted for larger problems.
+\end{itemize}
 \end{frame}
 
 
 \begin{frame}
-\Huge{\centerline{Questions}}
+\Huge{\centerline{Questions?
+		}}
 \end{frame}
 
 \end{document}
