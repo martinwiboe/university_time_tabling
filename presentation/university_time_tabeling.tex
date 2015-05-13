@@ -116,12 +116,15 @@ DTU 2015
 	\defverbatim[colored]\lstI{
 		\begin{lstlisting}[language=Java,basicstyle=\ttfamily,keywordstyle=\color{blue},commentstyle=\color{darkgreen}]
 // Total no. of lectures for a course
+// Unscheduled
 int[] courseAssignmentCount
 
 // No. of course lectures on each day
+// MinimumWorkingDays
 int[][] courseLecturesOnDay
 
 // No. of distinct working days for a course
+// MinimumWorkingDays
 int[] courseWorkingDays
 		\end{lstlisting}
 	}
@@ -129,12 +132,15 @@ int[] courseWorkingDays
 		\defverbatim[colored]\lstII{
 			\begin{lstlisting}[language=Java,basicstyle=\ttfamily,keywordstyle=\color{blue},commentstyle=\color{darkgreen}]
 // No. of lectures in room for each course
+// RoomStability
 int[][] lecturesInRoomForCourse
 
 // Is lecturer busy in given time slot?
+// SameLecturer constraint
 boolean[][][] lecturerBusy
 
 // Is curriculum assigned in given time slot?
+// SameCurriculum constraint
 boolean[][][] curriculumAssigned
 			\end{lstlisting}
 		}
@@ -161,6 +167,7 @@ boolean[][][] curriculumAssigned
 \frametitle{University Time Tabling}
 Every semester universities face the problem of creating good feasible timetable due to many complex constraints that have to be taken into consideration.
 
+See github.com/martinwiboe/university\_time\_tabling for source code
 \end{frame}
 %------------------------------------------------
 \section{Metaheuristic} 
@@ -213,13 +220,12 @@ Different types of metaheuristics:
 \begin{frame}
 	\frametitle{Delta Evaluation}
 	Extra bookkeeping to increase evaluation speed of modified solution.
-	
 	Trade memory and complexity for better performance.
 	
 	\begin{block}{Insights}
 		\begin{itemize}
-			\item \emph{add} and \emph{remove} only affects the given course $+$ neighbors.
-			\item \emph{swap} is equal to \{\emph{remove}, \emph{remove}, \emph{add}, \emph{add}\}
+			\item \textbf{add} and \textbf{remove} only affects the given course $+$ neighbors.
+			\item \textbf{swap} is equal to \{\textbf{remove}, \textbf{remove}, \textbf{add}, \textbf{add}\}
 		\end{itemize}	
 	\end{block}
 	
@@ -236,17 +242,18 @@ Different types of metaheuristics:
 \end{frame}
 
 \begin{frame}
-	\frametitle{Delta Evaluation is Significantly Faster}
-	After optimizations:
+	\frametitle{Delta Evaluation is Fast}
+	Let $q$ be the number of curricula for the course affected by an operation, typically a small number.
 	
+	Then we can
 	\begin{itemize}
 		\item evaluate a neighbor solution in $\mathcal{O}(q)$
 		\item update the bookkeeping state in $\mathcal{O}(q)$
 	\end{itemize}
 	
-	$q$ is number of curricula for affected course, typically few. Can be further reduced to $\mathcal{O}(1)$.
+	% Both can be further improved to run in $\mathcal{O}(1)$.
 	
-	Overall speedup in our tests was more than 200x, depending on the data set.
+	Speedup of more than 100x, depending on the data set.
 \end{frame}
 
 %------------------------------------------------
@@ -381,10 +388,16 @@ Uses local search paradigm and memory for optimization.
 \frametitle{Parameter Tuning}
 \begin{itemize}
 \item 13 different test data, 15 runs for each test data
+
+\item Hill Climbing
+\begin{itemize}
+	\item no parameters
+\end{itemize}
+
 \item Simulated Annealing 
 \begin{itemize}
 \item 2 initial temperatures : 90 and 45
-\item  3 cooling rate : 0.95, 	0.97,0.99
+\item 3 cooling rate : 0.95, 0.97,0.99
 \end{itemize}
 \item TABU: 
 \begin{itemize}
@@ -395,6 +408,14 @@ Uses local search paradigm and memory for optimization.
 \end{frame}
 
 %------------------------------------------------
+
+\begin{frame}
+	\frametitle{Hill Climbing}
+	Sum of average value across data sets: {\color{red} $16365$} (std.dev. $655$.)
+	
+	Extremely poor result to Simulated Annealing and TABU.
+\end{frame}
+
 \begin{frame}
 \frametitle{Simulated Annealing}
  \centerline{\includegraphics[width=1.0\textwidth]{simulated_annealing.png}}
