@@ -13,7 +13,7 @@ public class ExhaustiveTABU extends TABUHeuristic {
                     int assignedCourse = currentSchedule.assignments[day][period][room];
                     if (assignedCourse != EMPTY_ROOM) {
                         int newValue = valueIfRemovingCourse(currentSchedule, currentScheduleValue, day, period, room);
-                        if (newValue < result.scheduleValueAfterApplying) {
+                        if (newValue <= result.scheduleValueAfterApplying) {
                             TABUOperation operation = new TABUOperation();
                             operation.day = day;
                             operation.period = period;
@@ -36,14 +36,16 @@ public class ExhaustiveTABU extends TABUHeuristic {
                                             continue;
 
                                         int newValueAfterSwap = valueIfSwappingCourses(currentSchedule, currentScheduleValue, day, period, room, day2, period2, room2);
-                                        if (newValueAfterSwap < result.scheduleValueAfterApplying) {
+                                        if (newValueAfterSwap <= result.scheduleValueAfterApplying) {
                                             TABUOperation operation = new TABUOperation();
                                             operation.day = day;
                                             operation.period = period;
                                             operation.room = room;
+                                            operation.course = assignedCourse;
                                             operation.otherDay = day2;
                                             operation.otherPeriod = period2;
                                             operation.otherRoom = room2;
+                                            operation.otherCourse = otherCourse;
                                             operation.type = OperationType.Swap;
 
                                             if (!isTaboo(operation)) {
@@ -60,7 +62,7 @@ public class ExhaustiveTABU extends TABUHeuristic {
                     } else {
                         for (int course = 0; course < basicInfo.courses; course++) {
                             int newValue = valueIfAssigningCourse(currentSchedule, currentScheduleValue, day, period, room, course);
-                            if (newValue < result.scheduleValueAfterApplying) {
+                            if (newValue <= result.scheduleValueAfterApplying) {
                                 TABUOperation operation = new TABUOperation();
                                 operation.day = day;
                                 operation.period = period;

@@ -64,6 +64,9 @@ public abstract class TABUHeuristic extends Heuristic {
         cloneArray(schedule.assignments, bestSchedule.assignments);
         bestScheduleValue = currentScheduleValue;
 
+        StringBuilder sb = new StringBuilder();
+        sb.append("iteration,best value\n");
+
         startCountdown();
 
         while(!timeoutReached()) {
@@ -72,7 +75,11 @@ public abstract class TABUHeuristic extends Heuristic {
             // Determine the operation needed to get the best solution in neighborhood
             TABUOperationResult operation = bestSolutionInNeighborhood();
 
+            if (operation == null || operation.operation == null)
+                continue;
+
             // Apply that operation to the currentSchedule
+            addTaboo(operation.operation);
             applyOperation(currentSchedule, operation.operation);
             currentScheduleValue = operation.scheduleValueAfterApplying;
 
@@ -81,7 +88,12 @@ public abstract class TABUHeuristic extends Heuristic {
                 cloneArray(schedule.assignments, bestSchedule.assignments);
                 bestScheduleValue = currentScheduleValue;
             }
+            if (iterationCount % 10 == 0) {
+                sb.append(iterationCount).append(",").append(bestScheduleValue).append("\n");
+            }
         }
+
+        System.out.print(sb.toString());
 
         return bestSchedule;
     }
@@ -99,7 +111,7 @@ public abstract class TABUHeuristic extends Heuristic {
             case Assign:
             case Swap:
                 for (TABUOperation taboo : tabooList) {
-                    if (taboo.course == operation.course || taboo.course == operation.otherCourse || taboo.otherCourse == operation.course || taboo.otherCourse == operation.otherCourse)
+                    if (taboo != null && (taboo.course == operation.course || taboo.course == operation.otherCourse || taboo.otherCourse == operation.course || (taboo.otherCourse == operation.otherCourse && taboo.otherCourse != -1)))
                         return true;
                 }
                 return false;
@@ -107,7 +119,7 @@ public abstract class TABUHeuristic extends Heuristic {
             case Remove:
             default:
                 for (TABUOperation taboo : tabooList) {
-                    if (taboo.day == operation.day && taboo.period == operation.period && taboo.room == operation.room)
+                    if (taboo != null && (taboo.day == operation.day && taboo.period == operation.period && taboo.room == operation.room))
                         return true;
                 }
                 return false;

@@ -98,7 +98,7 @@ public class UniversityTimeTabling {
 
         // Create the heuristic
         ExhaustiveTABU heuristic = new ExhaustiveTABU();
-        heuristic.tabooListLength = 5;
+        heuristic.tabooListLength = 20;
 
 
         heuristic.setTimeout(timeout);
